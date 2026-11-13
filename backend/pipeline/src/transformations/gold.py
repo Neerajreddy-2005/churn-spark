@@ -32,7 +32,8 @@ def segment_table(silver_df, column):
 def overall_table(silver_df):
     agg = silver_df.agg(
         F.count(F.lit(1)).alias("customers"),
-        F.coalesce(F.sum("churn_flag"), F.lit(0)).cast("long").alias("churned"),
+        # 0 for an empty table; null (unknown) when the file had no Churn column.
+        F.when(F.count(F.lit(1)) == 0, F.lit(0)).otherwise(F.sum("churn_flag")).cast("long").alias("churned"),
     ).withColumn("segment", F.lit("All"))
     return _with_rate(agg)
 

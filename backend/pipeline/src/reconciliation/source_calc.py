@@ -17,7 +17,9 @@ def tenure_band(tenure):
         return "13-24"
     if t <= 48:
         return "25-48"
-    return "49-72"
+    if t <= 72:
+        return "49-72"
+    return "73+"
 
 
 def compute_source_stats(csv_path):
@@ -26,11 +28,14 @@ def compute_source_stats(csv_path):
     total = Decimal(0)
     segments = {name: {} for name in [*SEGMENT_COLUMNS, "tenure"]}
 
-    with open(csv_path, newline="", encoding="utf-8") as f:
-        for row in csv.DictReader(f):
+    # utf-8-sig: Excel's "CSV UTF-8" adds a byte-order mark; Spark strips it, so the source side must too.
+    with open(csv_path, newline="", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f)
+        labelled = "Churn" in (reader.fieldnames or [])  # unlabelled file: churn counts are None
+        for row in reader:
             row_count += 1
             ids.add(row["customerID"])
-            is_churn = row["Churn"] == "Yes"
+            is_churn = row["Churn"] == "Yes" if labelled else 0
             churned += is_churn
             charges = row["TotalCharges"].strip()
             if charges == "":
@@ -45,9 +50,15 @@ def compute_source_stats(csv_path):
                 seg["customers"] += 1
                 seg["churned"] += is_churn
 
+    if not labelled:
+        churned = None
+        for groups in segments.values():
+            for seg in groups.values():
+                seg["churned"] = None
     return {
         "row_count": row_count,
         "distinct_ids": len(ids),
+        "labelled": labelled,
         "churned": churned,
         "blank_total_charges": blank,
         "total_charges_sum": total.quantize(Decimal("0.01")),

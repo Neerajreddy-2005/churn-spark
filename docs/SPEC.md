@@ -112,7 +112,7 @@ Acceptance criteria:
 - Silver has snake_case names and the types in `DATA_SCHEMA.md`.
 - `total_charges` is double with no nulls; blank values on tenure-0 rows are set to 0.0 and `total_charges_imputed = true` for exactly those rows.
 - Silver row count equals Bronze row count (exclusions expected 0; any exclusion is listed with a reason).
-- Derived columns: `tenure_band` (0-12, 13-24, 25-48, 49-72), `addon_service_count` (number of Yes among online_security, online_backup, device_protection, tech_support, streaming_tv, streaming_movies), `churn_flag` (0/1), `has_internet`.
+- Derived columns: `tenure_band` (0-12, 13-24, 25-48, 49-72, 73+), `addon_service_count` (number of Yes among online_security, online_backup, device_protection, tech_support, streaming_tv, streaming_movies), `churn_flag` (0/1), `has_internet`.
 - Gold tables exist as defined in `DATA_SCHEMA.md`, each with `segment`, `customers`, `churned`, `churn_rate_pct`.
 - `churn_rate_pct` is computed from the counts, rounded to 2 decimals, and never divides by zero.
 
@@ -243,15 +243,15 @@ Applied to Bronze unless noted. Rules and thresholds live in `config/dq_rules.js
 | dq03 | customerID not null | customerID | 0 nulls/blanks | fail |
 | dq04 | customerID unique | customerID | 0 rows with a duplicated customerID | fail |
 | dq05a | gender in allowed set | gender | 0 invalid | fail |
-| dq05b | Yes/No columns in allowed set | Partner, Dependents, PhoneService, PaperlessBilling, Churn | 0 invalid | fail |
+| dq05b | Yes/No columns in allowed set (Churn only when the file has it) | Partner, Dependents, PhoneService, PaperlessBilling, Churn | 0 invalid | fail |
 | dq06a | MultipleLines in allowed set | MultipleLines | 0 invalid | fail |
 | dq06b | InternetService in allowed set | InternetService | 0 invalid | fail |
 | dq06c | Add-on columns in allowed set | OnlineSecurity, OnlineBackup, DeviceProtection, TechSupport, StreamingTV, StreamingMovies | 0 invalid | fail |
 | dq06d | Contract in allowed set | Contract | 0 invalid | fail |
 | dq06e | PaymentMethod in allowed set | PaymentMethod | 0 invalid | fail |
 | dq07 | SeniorCitizen in {0, 1} | SeniorCitizen | 0 invalid | fail |
-| dq08 | tenure is an integer in 0..72 (0 is valid) | tenure | 0 outside range | fail |
-| dq09 | MonthlyCharges numeric and within 18.25..118.75 | MonthlyCharges | 0 rows | fail |
+| dq08 | tenure is an integer in 0..600 months (0 is valid; the Kaggle file stops at 72) | tenure | 0 outside range | fail |
+| dq09 | MonthlyCharges numeric and within 0..10000 (the Kaggle file spans 18.25..118.75) | MonthlyCharges | 0 rows | fail |
 | dq10 | TotalCharges blank on a row with tenure = 0 (new, unbilled customer) | TotalCharges | no limit; count recorded (expected 11) | fix |
 | dq11 | TotalCharges blank on a row with tenure > 0 | TotalCharges | 0 rows | fail |
 | dq11b | TotalCharges non-blank but not numeric | TotalCharges | 0 rows | fail |

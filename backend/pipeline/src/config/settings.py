@@ -15,6 +15,9 @@ EXPECTED_RAW_COLUMNS = [
     "StreamingMovies", "Contract", "PaperlessBilling", "PaymentMethod",
     "MonthlyCharges", "TotalCharges", "Churn",
 ]
+# A file without Churn is "unlabelled": customers are scored, but there is no actual churn to report.
+OPTIONAL_RAW_COLUMNS = ["Churn"]
+REQUIRED_RAW_COLUMNS = [c for c in EXPECTED_RAW_COLUMNS if c not in OPTIONAL_RAW_COLUMNS]
 
 METADATA_COLUMNS = ["_ingest_ts", "_source_file", "_batch_id"]
 

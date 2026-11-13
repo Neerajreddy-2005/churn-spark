@@ -177,3 +177,22 @@ def test_tiny_failing_rate_is_not_rounded_to_pass():
     # 1 bad row in 3 million rounds to 0.0 at 6 dp; it must still fail a 0 threshold.
     assert rule_status(1, 3_000_000, 0.0, "fail") == "fail"
     assert rule_status(0, 3_000_000, 0.0, "fail") == "pass"
+
+
+def test_unlabelled_file_skips_churn(spark):
+    cols = [c for c in EXPECTED_RAW_COLUMNS if c != "Churn"]
+    df = make_df(spark, cols + ["_ingest_ts"], [tuple(["Yes"] * 21)])
+    assert RULE_TYPES["schema"](df, {"columns": []}) == 0
+    assert RULE_TYPES["allowed_values"](df, {"columns": ["Partner", "Churn"], "values": ["Yes", "No"]}) == 0
+    assert RULE_TYPES["not_null"](df, {"columns": ["*"]}) == 0
+    # a required column is never skipped
+    no_tenure = make_df(spark, [c for c in cols if c != "tenure"], [tuple(["Yes"] * 19)])
+    assert RULE_TYPES["schema"](no_tenure, {"columns": []}) == 1
+
+
+def test_shipped_ranges_allow_real_world_values(spark):
+    by_id = {r["id"]: r for r in load_rules()}
+    assert fails(spark, "int_range", rows("0", "73", "600"), **{**by_id["dq08"], "columns": ["v"]}) == 0
+    assert fails(spark, "int_range", rows("-1", "601"), **{**by_id["dq08"], "columns": ["v"]}) == 2
+    assert fails(spark, "numeric_range", rows("0", "5.5", "250"), **{**by_id["dq09"], "columns": ["v"]}) == 0
+    assert fails(spark, "numeric_range", rows("-0.01", "10000.01"), **{**by_id["dq09"], "columns": ["v"]}) == 2

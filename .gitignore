@@ -28,6 +28,9 @@ derby.log
 
 # Power BI file is large and binary; PDF/PNG exports live in docs/powerbi/
 *.pbix
+# Third-party Kaggle test datasets (own licences, personal-looking fields): local only
+bi/powerbi/*.csv
+bi/powerbi/*.xlsx
 
 # Website build output and dependencies
 frontend/node_modules/

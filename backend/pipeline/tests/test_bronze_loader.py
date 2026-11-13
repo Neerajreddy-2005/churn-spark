@@ -65,11 +65,21 @@ def test_rerun_does_not_duplicate(spark, tmp_path):
 
 
 def test_missing_column_raises(spark, tmp_path):
+    i = EXPECTED_RAW_COLUMNS.index("tenure")
+    cols = [c for c in EXPECTED_RAW_COLUMNS if c != "tenure"]
+    rows = [",".join(v for j, v in enumerate(r.split(",")) if j != i) for r in ROWS]
+    csv = write_csv(tmp_path, ",".join(cols), rows)
+    with pytest.raises(ValueError, match="tenure"):
+        load_bronze(spark, csv, tmp_path / "bronze")
+
+
+def test_missing_churn_is_accepted(spark, tmp_path):
     cols = EXPECTED_RAW_COLUMNS[:-1]
     rows = [",".join(r.split(",")[:-1]) for r in ROWS]
     csv = write_csv(tmp_path, ",".join(cols), rows)
-    with pytest.raises(ValueError, match="Churn"):
-        load_bronze(spark, csv, tmp_path / "bronze")
+    out = tmp_path / "bronze"
+    assert load_bronze(spark, csv, out) == 3
+    assert "Churn" not in spark.read.format("delta").load(out.as_posix()).columns
 
 
 def test_extra_column_raises(spark, tmp_path):

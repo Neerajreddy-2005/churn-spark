@@ -1,5 +1,5 @@
 // CSV upload: month + drag-and-drop (or click) file zone. Used by the Upload page and the empty Overview.
-import { useRef, useState, type DragEvent, type FormEvent } from 'react'
+import { useId, useRef, useState, type DragEvent, type FormEvent } from 'react'
 import { useAuth } from './auth'
 import { supabase } from './supabase'
 import { IconFile, IconUpload } from './icons'
@@ -7,6 +7,23 @@ import { IconFile, IconUpload } from './icons'
 const MAX_BYTES = 5 * 1024 * 1024
 const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/
 const DENIED = 'Upload limit reached (20 per day) or not allowed'
+
+// Mirrors backend/pipeline/config/dq_rules.json (allowed values and ranges).
+const ACCEPTED: [string, string][] = [
+  ['customerID', 'Any text, unique per row'],
+  ['gender', 'Male · Female'],
+  ['SeniorCitizen', '0 · 1'],
+  ['Partner · Dependents · PhoneService · PaperlessBilling', 'Yes · No'],
+  ['tenure', 'Whole months, 0 to 600'],
+  ['MultipleLines', 'Yes · No · No phone service'],
+  ['InternetService', 'DSL · Fiber optic · No'],
+  ['OnlineSecurity · OnlineBackup · DeviceProtection · TechSupport · StreamingTV · StreamingMovies', 'Yes · No · No internet service'],
+  ['Contract', 'Month-to-month · One year · Two year'],
+  ['PaymentMethod', 'Electronic check · Mailed check · Bank transfer (automatic) · Credit card (automatic)'],
+  ['MonthlyCharges', 'Number from 0 to 10,000, no currency sign'],
+  ['TotalCharges', 'Number; may be blank only when tenure is 0'],
+  ['Churn (optional)', 'Yes · No. Leave the column out to score customers whose outcome is not known yet'],
+]
 
 function currentMonth() {
   const d = new Date()
@@ -19,6 +36,36 @@ function check(file: File | null): string | null {
   if (file.size === 0) return 'The file is empty.'
   if (file.size > MAX_BYTES) return 'The file is larger than 5 MB.'
   return null
+}
+
+// Floating panel: opens on hover or keyboard focus, toggles on tap (no hover on phones), Esc closes.
+function AcceptedFiles() {
+  const [open, setOpen] = useState(false)
+  const id = useId()
+  return (
+    <div className="accepted" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false) }}
+      onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false) }}>
+      <button type="button" className="linkish" aria-expanded={open} aria-controls={id} onClick={() => setOpen((o) => !o)}>
+        Which files are accepted?
+      </button>
+      <div id={id} className="accepted-pop" hidden={!open}>
+        <p className="muted">
+          The IBM Telco customer layout (Kaggle “Telco Customer Churn”). One row per customer · comma-separated .csv up to 5 MB ·
+          column names exactly as below (case-sensitive), in any order, with no extra columns.
+        </p>
+        <dl className="accepted-grid">
+          {ACCEPTED.map(([cols, values]) => (
+            <div key={cols} className={cols.length + values.length > 70 ? 'wide' : undefined}>
+              <dt>{cols}</dt>
+              <dd>{values}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  )
 }
 
 export function UploadDrop({ onUploaded }: { onUploaded?: () => void }) {
@@ -75,7 +122,7 @@ export function UploadDrop({ onUploaded }: { onUploaded?: () => void }) {
   }
 
   return (
-    <form className="stack" onSubmit={onSubmit} style={{ maxWidth: 'none' }}>
+    <form className="stack upload-form" onSubmit={onSubmit} style={{ maxWidth: 'none' }}>
       <label>
         Month this data is for
         <input value={month} onChange={(e) => setMonth(e.target.value)} placeholder="2026-11" inputMode="numeric"
@@ -100,6 +147,7 @@ export function UploadDrop({ onUploaded }: { onUploaded?: () => void }) {
         {info && <span className="ok" role="status">{info}</span>}
       </div>
       {error && <p className="error" role="alert">{error}</p>}
+      <AcceptedFiles />
     </form>
   )
 }

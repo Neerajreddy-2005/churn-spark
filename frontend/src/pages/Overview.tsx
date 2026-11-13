@@ -92,6 +92,8 @@ function MonthView({ d }: { d: MonthData }) {
   const overall = d.segments.find((s) => s.segment_type === 'overall')
   const scored = d.bands.high + d.bands.medium + d.bands.low
   const lostShare = overall?.mrr && overall.mrr_lost != null ? (overall.mrr_lost / overall.mrr) * 100 : null
+  // A file without a Churn column is scored, but actual churn and revenue lost are unknown.
+  const labelled = overall?.churned != null
   const seg = (t: string) => d.segments.filter((s) => s.segment_type === t)
 
   const open = (e: MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>, c: CustomerScore) => {
@@ -116,11 +118,17 @@ function MonthView({ d }: { d: MonthData }) {
           <div className="kpi">
             <span className="label">Churned</span>
             <span className="value">
-              <Explain title="Churn rate" body={<>Churned ÷ customers = {fmtNum(overall.churned)} ÷ {fmtNum(overall.customers)} = {fmtPct(overall.churn_rate_pct)}. {source(d.run)}</>}>
-                <CountUp value={overall.churned ?? 0} format={(n) => fmtNum(Math.round(n))} />
-              </Explain>
+              {labelled ? (
+                <Explain title="Churn rate" body={<>Churned ÷ customers = {fmtNum(overall.churned)} ÷ {fmtNum(overall.customers)} = {fmtPct(overall.churn_rate_pct)}. {source(d.run)}</>}>
+                  <CountUp value={overall.churned ?? 0} format={(n) => fmtNum(Math.round(n))} />
+                </Explain>
+              ) : (
+                <Explain title="Churn not known yet" body={<>This month's file had no Churn column, so who actually left is unknown. Every customer is still scored by the model. {source(d.run)}</>}>
+                  –
+                </Explain>
+              )}
             </span>
-            <span className="note">{fmtPct(overall.churn_rate_pct)} of customers</span>
+            <span className="note">{labelled ? <>{fmtPct(overall.churn_rate_pct)} of customers</> : 'No Churn column in this file'}</span>
           </div>
           <div className="kpi">
             <span className="label">High risk now</span>
@@ -134,11 +142,17 @@ function MonthView({ d }: { d: MonthData }) {
           <div className="kpi">
             <span className="label">Monthly revenue lost</span>
             <span className="value">
-              <Explain title="Monthly revenue lost" body={<>Sum of monthly charges of churned customers: {fmtMoney(overall.mrr_lost)} of {fmtMoney(overall.mrr)} total ({fmtPct(lostShare)}). No currency in the source data. {source(d.run)}</>}>
-                <CountUp value={overall.mrr_lost ?? 0} format={fmtMoney} />
-              </Explain>
+              {labelled ? (
+                <Explain title="Monthly revenue lost" body={<>Sum of monthly charges of churned customers: {fmtMoney(overall.mrr_lost)} of {fmtMoney(overall.mrr)} total ({fmtPct(lostShare)}). No currency in the source data. {source(d.run)}</>}>
+                  <CountUp value={overall.mrr_lost ?? 0} format={fmtMoney} />
+                </Explain>
+              ) : (
+                <Explain title="Revenue lost not known yet" body={<>Needs the Churn column. Total monthly revenue of the file: {fmtMoney(overall.mrr)}. {source(d.run)}</>}>
+                  –
+                </Explain>
+              )}
             </span>
-            <span className="note"><span className="nb">{fmtPct(lostShare)} of</span> monthly revenue</span>
+            <span className="note">{labelled ? <><span className="nb">{fmtPct(lostShare)} of</span> monthly revenue</> : 'Needs the Churn column'}</span>
           </div>
         </div>
       )}
@@ -183,20 +197,23 @@ function MonthView({ d }: { d: MonthData }) {
 }
 
 // Churn rate per segment as cobalt bars, scaled to the highest rate in the group.
+// Unlabelled month (no Churn column): the bars show customer counts instead.
 function BarPanel({ title, sub, rows }: { title: string; sub?: string; rows: SegmentAggregate[] }) {
-  const sorted = [...rows].sort((a, b) => (b.churn_rate_pct ?? 0) - (a.churn_rate_pct ?? 0))
+  const labelled = rows.some((r) => r.churned != null)
+  const value = (r: SegmentAggregate) => (labelled ? r.churn_rate_pct : r.customers) ?? 0
+  const sorted = [...rows].sort((a, b) => value(b) - value(a))
   if (title === 'Churn by tenure') sorted.sort((a, b) => parseInt(a.segment) - parseInt(b.segment))
-  const max = Math.max(...sorted.map((r) => r.churn_rate_pct ?? 0), 1)
+  const max = Math.max(...sorted.map(value), 1)
   return (
     <section className="panel">
-      <div className="panel-head"><h2>{title}</h2><span className="sub">{sub ?? 'Churn rate'}</span></div>
+      <div className="panel-head"><h2>{labelled ? title : title.replace(/^Churn by/, 'Customers by')}</h2><span className="sub">{labelled ? (sub ?? 'Churn rate') : 'Customers · churn not known yet'}</span></div>
       {sorted.length === 0 ? <p className="empty-line">No data for this month.</p> : (
         <div className="bars">
           {sorted.map((r, i) => (
-            <div className="bar" key={r.segment} title={`${fmtNum(r.churned)} of ${fmtNum(r.customers)} churned`}>
+            <div className="bar" key={r.segment} title={labelled ? `${fmtNum(r.churned)} of ${fmtNum(r.customers)} churned` : `${fmtNum(r.customers)} customers`}>
               <span className="name">{r.segment}</span>
-              <span className="track"><span className="fill" style={{ width: `${((r.churn_rate_pct ?? 0) / max) * 100}%`, ['--i' as string]: i }} /></span>
-              <span className="val">{fmtPct(r.churn_rate_pct)}</span>
+              <span className="track"><span className="fill" style={{ width: `${(value(r) / max) * 100}%`, ['--i' as string]: i }} /></span>
+              <span className="val">{labelled ? fmtPct(r.churn_rate_pct) : fmtNum(r.customers)}</span>
             </div>
           ))}
         </div>

@@ -343,6 +343,23 @@ form.inline input { width: 12rem; }
 .dropzone svg { width: 34px; height: 34px; color: var(--accent); }
 .dropzone strong { font-size: 15px; }
 .dropzone .muted { font-size: 12.5px; }
+.upload-form { position: relative; }
+/* the panel anchors to the whole upload form, so it spreads wide rather than tall */
+.accepted { width: fit-content; font-size: 13px; }
+.accepted .linkish { background: none; border: 0; padding: 4px 0; min-height: 24px; color: var(--accent); font: inherit; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+/* padding-top (not margin) bridges the gap so the pointer can travel into the panel without closing it */
+.accepted-pop { position: absolute; left: 0; right: 0; top: 100%; z-index: 30; padding-top: 6px; }
+.accepted-pop[hidden] { display: none; }
+.accepted-pop > * { position: relative; }
+.accepted-pop::before { content: ""; position: absolute; inset: 6px 0 0; background: var(--raised); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--float-shadow); }
+.accepted-pop:not([hidden]) { animation: pop var(--t-med) var(--ease-out); transform-origin: top left; }
+.accepted-pop > p { margin: 0; padding: 14px 16px 0; line-height: 1.55; }
+.accepted-pop > .accepted-grid { padding: 0 16px 16px; }
+.accepted-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin: 10px 0 0; }
+.accepted-grid > div { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+@media (min-width: 640px) { .accepted-grid > .wide { grid-column: span 2; } }
+.accepted-grid dt { font-weight: 600; overflow-wrap: anywhere; }
+.accepted-grid dd { margin: 4px 0 0; color: var(--muted); line-height: 1.45; }
 .empty-line { color: var(--muted); padding: 18px 0; }
 
 /* ---------- timeline ---------- */

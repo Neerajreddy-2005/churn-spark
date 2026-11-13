@@ -53,7 +53,7 @@
   },
   {
     "id": "dq05b",
-    "description": "Yes/No columns in allowed set",
+    "description": "Yes/No columns in allowed set (Churn only when the file has it)",
     "type": "allowed_values",
     "columns": [
       "Partner",
@@ -166,7 +166,7 @@
   },
   {
     "id": "dq08",
-    "description": "tenure is an integer in 0..72",
+    "description": "tenure is an integer in 0..600 months",
     "type": "int_range",
     "columns": [
       "tenure"
@@ -174,19 +174,19 @@
     "action": "fail",
     "max_failing_rate": 0.0,
     "min": 0,
-    "max": 72
+    "max": 600
   },
   {
     "id": "dq09",
-    "description": "MonthlyCharges numeric within 18.25..118.75",
+    "description": "MonthlyCharges numeric within 0..10000",
     "type": "numeric_range",
     "columns": [
       "MonthlyCharges"
     ],
     "action": "fail",
     "max_failing_rate": 0.0,
-    "min": 18.25,
-    "max": 118.75
+    "min": 0,
+    "max": 10000
   },
   {
     "id": "dq10",

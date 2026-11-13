@@ -6,6 +6,62 @@ Status: Phases 1-4 done (ingestion, data quality, Silver/Gold, reconciliation). 
 
 Design details are in [docs/SPEC.md](docs/SPEC.md). Column and table definitions are in [docs/DATA_SCHEMA.md](docs/DATA_SCHEMA.md). The website's design system is in [docs/design/DESIGN.md](docs/design/DESIGN.md).
 
+## Who it is for and why
+
+**In one line:** each month a subscription company uploads its customer list, and Churn-Spark tells the retention team which customers are most likely to leave, why, and how much revenue is at stake. Every number is checked against the source file.
+
+### The business problem
+
+Subscription businesses (telecom, broadband, pay-TV, streaming) lose recurring revenue every month to customers who cancel. A retention team can only call so many people, so it needs answers to three questions:
+
+1. **Who** is most likely to leave next?
+2. **Why**: what about this customer (contract, tenure, services, billing) drives the risk?
+3. **Can we trust the numbers?** A wrong file or a silent pipeline bug leads to calling the wrong people and reporting the wrong revenue.
+
+Churn-Spark answers all three in one workflow.
+
+### Who uses it
+
+| Role | What they do in Churn-Spark |
+|---|---|
+| Retention manager | Uploads the monthly customer export, reads the overview (customers, churn, high-risk count, revenue lost), creates and manages analyst accounts |
+| Retention analyst | Works the at-risk list, opens a customer to see the top 3 reasons for the score, logs the action taken and its outcome |
+| Data / BI team | Uses the SQL Server star schema and the Power BI report for deeper analysis |
+| Platform admin (the operator) | Creates organisations and their managers, protected by MFA; never sees any company's customer data |
+
+Each company (organisation) sees only its own data, enforced in the database by row-level security.
+
+### What a company gets from each upload
+
+| Step | What it gives the business |
+|---|---|
+| 20 data-quality rules | A broken or wrong file is rejected with a plain reason (for example "duplicate customer IDs, 20 rows") instead of producing wrong numbers |
+| Reconciliation (26 checks) | Proof that customer counts, churn counts and charges match the uploaded file exactly at every stage |
+| Churn model | A risk score (high / medium / low) for every customer, with the top 3 reasons in plain words |
+| Overview and at-risk list | Where to spend the team's limited calling time this month |
+| Retention actions and audit log | A record of who was contacted, what was offered and what happened |
+
+### Measured on the public IBM sample (7,043 customers)
+
+- 1,869 customers churned (26.54%), taking 139,130.85 of 456,116.60 monthly revenue (30.50%). No currency is given in the source data. Source: [docs/INSIGHTS.md](docs/INSIGHTS.md).
+- The churn model scores AUC 0.8328 on customers it never saw in training.
+- With a fixed calling budget of 20% of customers, ranking by model risk reaches 49.33% of the customers who churned. The simple rule "call month-to-month customers" reaches 31.98% with the same budget. Source: `model_metrics.json`.
+
+### What data it accepts today
+
+One layout: the IBM Telco customer export (Kaggle "Telco Customer Churn"), with the same 20 column names, a comma-separated `.csv` of up to 5 MB. The Upload page lists every column and its allowed values.
+
+- **With a `Churn` column (Yes/No)**, for past months whose outcome is known, you also see actual churn and revenue lost.
+- **Without a `Churn` column**, for this month's customers whose outcome is not known yet, every customer is still scored, and the overview shows churn as "not known yet" instead of 0.
+- **Any other file** (a different layout, semicolon-separated, wrong values) is rejected with the reason, and nothing reaches the dashboard.
+
+### Limits, stated plainly
+
+- It accepts **one data layout** today. A "bring your own churn dataset" mode (automatic data exploration, choosing the ID and churn columns, a model trained on that company's own data) is the next planned feature.
+- The model is trained on **one public snapshot**. It shows patterns in that data and has not been validated on a real company's history over time.
+- The pipeline runs as a **batch job on a laptop** (or Docker). Uploads wait in a queue until the worker processes them, which takes about 1.5 to 2.5 minutes per file.
+- It is a **portfolio prototype** that shows data engineering, analytics, BI and ML skills end to end. It is not a commercial product.
+
 ## Architecture
 
 ```

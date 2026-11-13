@@ -21,10 +21,10 @@ from pyspark.sql import functions as F
 from pyspark.sql.types import StringType, StructField, StructType
 
 from src.config.settings import (
-    EVIDENCE_DIR, GOLD_OVERALL, GOLD_SEGMENTS, MODEL_DIR, PROJECT_ROOT,
+    EVIDENCE_DIR, GOLD_OVERALL, GOLD_SEGMENTS, MODEL_DIR, PROJECT_ROOT, REQUIRED_RAW_COLUMNS,
 )
 from src.config.supabase import jdbc_props, jdbc_url, redact, service_key
-from src.ingestion.bronze_loader import load_bronze
+from src.ingestion.bronze_loader import ColumnMismatch, load_bronze
 from src.ingestion.spark_session import get_spark
 from src.integration import supabase_api as api
 from src.integration.supabase_migrate import connect, execute, query
@@ -72,6 +72,35 @@ def format_reason(text):
 
 def summarize(results, statuses):
     return {s: sum(1 for r in results if r["status"] == s) for s in statuses}
+
+
+def column_reason(missing, extra):
+    """Plain-language rejection for a file whose columns do not match the Telco layout."""
+    def some(cols, n=4):
+        return ", ".join(cols[:n]) + (f" and {len(cols) - n} more" if len(cols) > n else "")
+    if len(missing) > len(REQUIRED_RAW_COLUMNS) // 2:
+        head = (f"This file does not look like the Telco churn layout: {len(missing)} of the "
+                f"{len(REQUIRED_RAW_COLUMNS)} required columns are missing ({some(missing)}).")
+    else:
+        head = f"Missing columns: {some(missing, 10)}." if missing else ""
+    parts = [head] if head else []
+    if len(extra) == 1 and ";" in extra[0]:  # whole header read as one column
+        parts.append("The file looks separated by semicolons; save it as comma-separated CSV.")
+    elif extra:
+        parts.append(f"Columns that are not part of the layout: {some(extra)}.")
+    lowered = {c.lower() for c in extra}
+    if any(c.lower() in lowered for c in missing):
+        parts.append("Column names are case-sensitive.")
+    parts.append("Churn is optional; every other column is required, with no extra columns.")
+    return " ".join(parts)
+
+
+def dq_reason(results):
+    """Rejection text naming each failed rule with its description and failing row count."""
+    failed = [r for r in results if r["status"] == "fail"]
+    # All ids first: the stored reason is capped at REASON_LIMIT, so details may be cut, ids never.
+    return (f"Data quality failed: {', '.join(r['rule_id'] for r in failed)}. Details: " + "; ".join(
+        f"{r['rule_id']} {r['description']} ({r['failing_rows']} rows)" for r in failed))
 
 
 @contextmanager
@@ -153,6 +182,7 @@ def segment_aggregate_rows(silver, gold, org_id, month):
         grouped = silver.groupBy(F.col(column).cast("string").alias("segment")).agg(*aggs)
         money[column] = {r["segment"]: r for r in grouped.collect()}
 
+    labelled = gold[GOLD_OVERALL].first()["churned"] is not None  # no Churn column -> loss unknown
     out = []
     for stype, table in [("overall", GOLD_OVERALL), *((c, t) for t, c in GOLD_SEGMENTS.items())]:
         for g in gold[table].collect():
@@ -160,8 +190,8 @@ def segment_aggregate_rows(silver, gold, org_id, month):
             out.append({
                 "org_id": org_id, "snapshot_month": month, "segment_type": stype,
                 "segment": g["segment"], "customers": g["customers"], "churned": g["churned"],
-                "churn_rate_pct": Decimal(str(g["churn_rate_pct"])),
-                "mrr": m["mrr"], "mrr_lost": m["mrr_lost"],
+                "churn_rate_pct": None if g["churn_rate_pct"] is None else Decimal(str(g["churn_rate_pct"])),
+                "mrr": m["mrr"], "mrr_lost": m["mrr_lost"] if labelled else None,
             })
     return out
 
@@ -248,8 +278,8 @@ def run_pipeline(spark, upload, csv_path, run, run_dir):
     with _timed(stages, "bronze"):
         try:
             rows["bronze"] = load_bronze(spark, csv_path, bronze_path=bronze, batch_id=run["run_id"])
-        except ValueError as e:
-            raise Rejected(f"File columns do not match the expected layout. {e}") from None
+        except ColumnMismatch as e:
+            raise Rejected(column_reason(e.missing, e.extra)) from None
 
     results, error = _checked(
         spark, org_id, run, "dq", dq_json, dq_report_schema.RESULT_SCHEMA, "dq_results",
@@ -257,8 +287,7 @@ def run_pipeline(spark, upload, csv_path, run, run_dir):
                        report_json=dq_json, run_id=run["run_id"]))
     run["dq_summary"] = summarize(results, ("pass", "warn", "fail"))
     if error:
-        failed = [r["rule_id"] for r in results if r["status"] == "fail"]
-        raise Rejected(f"Data quality failed: {', '.join(failed)}")
+        raise Rejected(dq_reason(results))
 
     with _timed(stages, "silver"):
         rows["silver"] = write_silver(spark, bronze_path=bronze, silver_path=silver_path)

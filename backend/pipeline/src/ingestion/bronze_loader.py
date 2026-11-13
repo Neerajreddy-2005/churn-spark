@@ -5,7 +5,7 @@ from pathlib import Path
 
 from pyspark.sql import functions as F
 
-from src.config.settings import BRONZE_PATH, EXPECTED_RAW_COLUMNS, RAW_CSV
+from src.config.settings import BRONZE_PATH, EXPECTED_RAW_COLUMNS, RAW_CSV, REQUIRED_RAW_COLUMNS
 from src.ingestion.spark_session import get_spark
 
 logger = logging.getLogger(__name__)
@@ -22,11 +22,17 @@ def read_raw(spark, csv_path):
     )
 
 
+class ColumnMismatch(ValueError):
+    def __init__(self, missing, extra):
+        super().__init__(f"Column mismatch. Missing: {missing}. Extra: {extra}")
+        self.missing, self.extra = missing, extra
+
+
 def validate_columns(df):
-    missing = [c for c in EXPECTED_RAW_COLUMNS if c not in df.columns]
+    missing = [c for c in REQUIRED_RAW_COLUMNS if c not in df.columns]
     extra = [c for c in df.columns if c not in EXPECTED_RAW_COLUMNS]
     if missing or extra:
-        raise ValueError(f"Column mismatch. Missing: {missing}. Extra: {extra}")
+        raise ColumnMismatch(missing, extra)
 
 
 def add_metadata(df, source_file, batch_id):

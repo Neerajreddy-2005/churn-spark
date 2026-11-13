@@ -1,12 +1,12 @@
 from pyspark.sql import functions as F
 
-from src.config.settings import EXPECTED_RAW_COLUMNS
+from src.config.settings import EXPECTED_RAW_COLUMNS, OPTIONAL_RAW_COLUMNS, REQUIRED_RAW_COLUMNS
 
 
-def _cols(rule):
-    if rule["columns"] == ["*"]:
-        return EXPECTED_RAW_COLUMNS
-    return rule["columns"]
+def _cols(rule, df):
+    """Rule columns; an optional column the file left out (Churn) is skipped, not failed."""
+    cols = EXPECTED_RAW_COLUMNS if rule["columns"] == ["*"] else rule["columns"]
+    return [c for c in cols if c in df.columns or c not in OPTIONAL_RAW_COLUMNS]
 
 
 def _count(df, cond):
@@ -22,7 +22,7 @@ def _any(conds):
 
 def check_schema(df, rule):
     actual = [c for c in df.columns if not c.startswith("_")]
-    missing = [c for c in EXPECTED_RAW_COLUMNS if c not in actual]
+    missing = [c for c in REQUIRED_RAW_COLUMNS if c not in actual]
     extra = [c for c in actual if c not in EXPECTED_RAW_COLUMNS]
     return len(missing) + len(extra)
 
@@ -33,7 +33,7 @@ def check_row_count_min(df, rule):
 
 def check_not_null(df, rule):
     conds = []
-    for c in _cols(rule):
+    for c in _cols(rule, df):
         cond = F.col(c).isNull()
         if rule.get("treat_blank_as_null", False):
             cond = cond | (F.trim(F.col(c)) == "")
@@ -48,7 +48,7 @@ def check_unique(df, rule):
 
 
 def check_allowed_values(df, rule):
-    conds = [~F.coalesce(F.col(c).isin(rule["values"]), F.lit(False)) for c in rule["columns"]]
+    conds = [~F.coalesce(F.col(c).isin(rule["values"]), F.lit(False)) for c in _cols(rule, df)]
     return _count(df, _any(conds))
 
 

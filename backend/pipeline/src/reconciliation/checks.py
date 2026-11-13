@@ -32,6 +32,13 @@ class ReconciliationError(Exception):
     pass
 
 
+def _rate_ok(row):
+    """churn_rate_pct = round(100*churned/customers, 2); both null when churn is unknown."""
+    if row["churned"] is None or row["churn_rate_pct"] is None:
+        return row["churned"] is None and row["churn_rate_pct"] is None
+    return abs(float(row["churn_rate_pct"]) - float(expected_rate(row["customers"], row["churned"]))) < 1e-9
+
+
 def expected_rate(customers, churned):
     if customers == 0:
         return Decimal("0.00")
@@ -62,11 +69,16 @@ def run_checks(spark, source, bronze_path, silver_path, gold_dir, dq_report_json
     silver = load(silver_path)
     bronze_count = bronze.count()
     silver_count = silver.count()
-    silver_churned = silver.filter(F.col("churn")).count()
+    labelled = source["labelled"]
+    # Unlabelled file (no Churn column): churn must stay unknown (null) all the way through.
+    silver_churned = silver.filter(F.col("churn") if labelled else F.col("churn").isNotNull()).count()
 
     numeric("rc01", "Source row count = Bronze row count", source["row_count"], bronze_count)
     numeric("rc02", "Bronze row count = Silver row count", bronze_count, silver_count)
-    numeric("rc03", "Silver churned = source churned", source["churned"], silver_churned)
+    if labelled:
+        numeric("rc03", "Silver churned = source churned", source["churned"], silver_churned)
+    else:
+        numeric("rc03", "Unlabelled file: Silver rows with a churn value", 0, silver_churned)
     numeric("rc04.bronze", "Distinct customer ids: source = Bronze", source["distinct_ids"],
             bronze.select("customerID").distinct().count())
     numeric("rc04.silver", "Distinct customer ids: source = Silver", source["distinct_ids"],
@@ -78,8 +90,12 @@ def run_checks(spark, source, bronze_path, silver_path, gold_dir, dq_report_json
         numeric(f"rc05.{short}", f"Gold {short}: sum(customers) = Silver count",
                 silver_count, sum(r["customers"] for r in rows))
     for short, rows in gold.items():
-        numeric(f"rc06.{short}", f"Gold {short}: sum(churned) = source churned",
-                source["churned"], sum(r["churned"] for r in rows))
+        if labelled:
+            numeric(f"rc06.{short}", f"Gold {short}: sum(churned) = source churned",
+                    source["churned"], sum(r["churned"] for r in rows))
+        else:
+            numeric(f"rc06.{short}", f"Unlabelled file: Gold {short} rows with a churned value",
+                    0, sum(1 for r in rows if r["churned"] is not None))
 
     for short in SEGMENT_GOLD:
         exp = {k: [v["customers"], v["churned"]] for k, v in source["segments"][short].items()}
@@ -91,8 +107,7 @@ def run_checks(spark, source, bronze_path, silver_path, gold_dir, dq_report_json
             mismatches, mismatches == 0))
 
     for short, rows in gold.items():
-        bad = sum(1 for r in rows
-                  if abs(float(r["churn_rate_pct"]) - float(expected_rate(r["customers"], r["churned"]))) >= 1e-9)
+        bad = sum(1 for r in rows if not _rate_ok(r))
         results.append(_result(
             run_id, run_ts, f"rc08.{short}",
             f"Gold {short}: churn_rate_pct = round(100*churned/customers, 2)",

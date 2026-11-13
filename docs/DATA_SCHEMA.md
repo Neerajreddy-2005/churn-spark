@@ -32,7 +32,7 @@ Type is what the CSV contains. In Bronze every column is read as string; Silver 
 | 18 | PaymentMethod | string | Electronic check, Mailed check, Bank transfer (automatic), Credit card (automatic) | |
 | 19 | MonthlyCharges | double | about 18.25..118.75 | |
 | 20 | TotalCharges | **string** | numeric text, or blank `" "` | blank for 11 rows, all tenure = 0 |
-| 21 | Churn | string | Yes, No | target label |
+| 21 | Churn | string | Yes, No | target label; optional in uploads (no Churn column = unlabelled file: customers are scored, churn stays null) |
 
 ### Known data issue: blank TotalCharges
 
@@ -79,9 +79,9 @@ Derived columns:
 | Column | Type | Definition |
 |---|---|---|
 | total_charges_imputed | boolean | true when TotalCharges was blank and set to 0.0 |
-| churn_flag | int | 1 if Churn = Yes else 0 |
+| churn_flag | int | 1 if Churn = Yes, 0 if No, null when the file has no Churn column |
 | has_internet | boolean | internet_service <> 'No' |
-| tenure_band | string | 0-12, 13-24, 25-48, 49-72 months (tenure 0 falls in 0-12) |
+| tenure_band | string | 0-12, 13-24, 25-48, 49-72 months (tenure 0 falls in 0-12); 73+ for uploads with longer tenure |
 | addon_service_count | int | count of Yes among online_security, online_backup, device_protection, tech_support, streaming_tv, streaming_movies (0..6) |
 
 ### Gold
@@ -94,7 +94,7 @@ Derived columns:
 | gold_churn_by_internet_service | DSL, Fiber optic, No |
 | gold_churn_by_contract | Month-to-month, One year, Two year |
 | gold_churn_by_payment_method | 4 payment methods |
-| gold_churn_by_tenure_band | 0-12, 13-24, 25-48, 49-72 |
+| gold_churn_by_tenure_band | 0-12, 13-24, 25-48, 49-72 (73+ when present) |
 
 Further segment tables (senior citizen, add-on count, paperless billing) can be added later using the same four columns; they are not required.
 

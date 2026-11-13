@@ -16,7 +16,7 @@ from src.integration import supabase_api as api
 from src.integration.supabase_admin import create_org, create_user
 from src.integration.supabase_migrate import connect
 from src.integration.supabase_worker import (
-    Rejected, format_reason, process_queue, segment_aggregate_rows, validate_upload,
+    Rejected, column_reason, dq_reason, format_reason, process_queue, segment_aggregate_rows, validate_upload,
 )
 from src.model.train import META_FILE
 from src.output.evidence import write_evidence
@@ -224,3 +224,45 @@ def test_worker_end_to_end_live(spark):
     assert not problems, f"cleanup problems: {problems}"
     assert not failed, f"failed assertions: {failed}"
     assert len(check.results) >= 18
+
+
+def test_column_reason_other_layout():
+    from src.config.settings import REQUIRED_RAW_COLUMNS
+    bank = ["RowNumber", "CustomerId", "Surname", "CreditScore", "Geography", "Gender", "Age", "Tenure"]
+    text = column_reason(list(REQUIRED_RAW_COLUMNS), bank)
+    assert text.startswith("This file does not look like the Telco churn layout: 20 of the 20")
+    assert "[" not in text and "Column names are case-sensitive." in text  # Gender vs gender
+
+
+def test_column_reason_small_mismatch():
+    text = column_reason(["tenure"], ["Region"])
+    assert text.startswith("Missing columns: tenure. Columns that are not part of the layout: Region.")
+    assert "Churn is optional" in text and "case-sensitive" not in text
+
+
+def test_dq_reason_lists_ids_descriptions_and_counts():
+    results = [{"rule_id": "dq04", "description": "customerID unique", "status": "fail", "failing_rows": 20},
+               {"rule_id": "dq10", "description": "x", "status": "warn", "failing_rows": 3}]
+    assert dq_reason(results) == "Data quality failed: dq04. Details: dq04 customerID unique (20 rows)"
+    many = [{"rule_id": f"dq{i:02d}", "description": "x" * 60, "status": "fail", "failing_rows": 1} for i in range(17)]
+    assert "dq16" in format_reason(dq_reason(many))  # every id survives the 500-char cap
+
+
+def test_segment_aggregate_rows_unlabelled(spark):
+    rows = [("a", "Month-to-month", "DSL", "Mailed check", 3, "0-12", 10.10, None),
+            ("b", "Two year", "DSL", "Mailed check", 80, "73+", 20.20, None)]
+    silver = spark.createDataFrame(rows, "customer_id string, contract string, internet_service string, "
+                                         "payment_method string, tenure_months int, tenure_band string, "
+                                         "monthly_charges double, churn boolean")
+    silver = silver.withColumn("churn_flag", silver["churn"].cast("int"))
+    out = segment_aggregate_rows(silver, build_gold(silver), ORG, "2026-12")
+    overall = next(r for r in out if r["segment_type"] == "overall")
+    assert overall["customers"] == 2 and overall["mrr"] == Decimal("30.30")
+    assert overall["churned"] is None and overall["churn_rate_pct"] is None and overall["mrr_lost"] is None
+    assert all(r["churned"] is None and r["mrr_lost"] is None for r in out)
+
+
+def test_column_reason_semicolons():
+    from src.config.settings import REQUIRED_RAW_COLUMNS
+    text = column_reason(list(REQUIRED_RAW_COLUMNS), [";".join(REQUIRED_RAW_COLUMNS)])
+    assert "separated by semicolons" in text

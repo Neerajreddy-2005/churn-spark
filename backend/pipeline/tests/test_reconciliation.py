@@ -74,6 +74,18 @@ def test_compute_source_stats(tmp_path):
     }
 
 
+def test_compute_source_stats_unlabelled(tmp_path):
+    cols = [c for c in EXPECTED_RAW_COLUMNS if c != "Churn"]
+    path = tmp_path / "u.csv"
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore")
+        w.writeheader()
+        w.writerow({**BASE, "tenure": "80"})
+    s = compute_source_stats(path)
+    assert s["labelled"] is False and s["churned"] is None and s["row_count"] == 1
+    assert s["segments"]["tenure"] == {"73+": {"customers": 1, "churned": None}}
+
+
 @pytest.mark.parametrize("customers, churned, expected", [
     (3, 1, "33.33"), (3, 2, "66.67"), (8, 1, "12.50"), (16, 1, "6.25"),
     (400, 1, "0.25"), (200, 1, "0.50"), (0, 0, "0.00"),
@@ -171,3 +183,31 @@ def test_wrong_gold_rate_fails(spark, pipeline):
     report = read_report(p["report_json"])
     assert report["rc08.contract"]["status"] == "fail"
     assert report["rc08.contract"]["difference"] == 1.0
+
+
+@pytest.mark.integration
+def test_unlabelled_run_passes(spark, tmp_path):
+    cols = [c for c in EXPECTED_RAW_COLUMNS if c != "Churn"]
+    src = tmp_path / "unlabelled.csv"
+    with open(src, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore")
+        w.writeheader()
+        w.writerow({**BASE, "customerID": "u1"})
+        w.writerow({**BASE, "customerID": "u2", "tenure": "90", "Contract": "Two year"})
+    load_bronze(spark, src, tmp_path / "bronze", batch_id="u")
+    run_dq(spark, bronze_path=tmp_path / "bronze", results_path=tmp_path / "dq_results",
+           report_json=tmp_path / "dq_report.json")
+    write_silver(spark, bronze_path=tmp_path / "bronze", silver_path=tmp_path / "silver")
+    write_gold(spark, silver_path=tmp_path / "silver", gold_dir=tmp_path / "gold")
+    results = run_reconciliation(spark, csv_path=src, **paths(tmp_path, name="u"))
+    assert sorted(r["check_id"] for r in results) == sorted(EXPECTED_IDS)
+    assert all(r["status"] == "pass" for r in results), [r for r in results if r["status"] != "pass"]
+
+
+def test_compute_source_stats_excel_bom(tmp_path):
+    path = tmp_path / "bom.csv"
+    with open(path, "w", newline="", encoding="utf-8-sig") as f:  # Excel "CSV UTF-8"
+        w = csv.DictWriter(f, fieldnames=EXPECTED_RAW_COLUMNS)
+        w.writeheader()
+        w.writerow(BASE)
+    assert compute_source_stats(path)["distinct_ids"] == 1

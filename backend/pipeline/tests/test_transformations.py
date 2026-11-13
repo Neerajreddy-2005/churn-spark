@@ -81,8 +81,8 @@ def test_booleans_and_three_state(spark):
 
 
 def test_tenure_band_boundaries(spark):
-    tenures = [0, 1, 12, 13, 24, 25, 48, 49, 72]
-    expected = ["0-12", "0-12", "0-12", "13-24", "13-24", "25-48", "25-48", "49-72", "49-72"]
+    tenures = [0, 1, 12, 13, 24, 25, 48, 49, 72, 73, 300]
+    expected = ["0-12", "0-12", "0-12", "13-24", "13-24", "25-48", "25-48", "49-72", "49-72", "73+", "73+"]
     df = build_silver(bronze_df(spark, [{"tenure": str(t), "TotalCharges": "1.0"} for t in tenures]))
     got = {r.tenure_months: r.tenure_band for r in df.collect()}
     assert [got[t] for t in tenures] == expected
@@ -200,3 +200,14 @@ def test_real_baseline_segments(gold):
 def test_real_tenure_band_rows(gold):
     _, t = gold
     assert t["gold_churn_by_tenure_band"].count() == 4
+
+
+def test_unlabelled_churn_stays_null(spark):
+    df = bronze_df(spark, [{"Churn": "Yes"}, {"Churn": "No"}]).drop("Churn")
+    silver = build_silver(df)
+    assert silver.columns == SILVER_COLUMNS
+    assert all(r.churn is None and r.churn_flag is None for r in silver.collect())
+    overall = overall_table(silver).first()
+    assert overall.customers == 2 and overall.churned is None and overall.churn_rate_pct is None
+    seg = segment_table(silver, "contract").first()
+    assert seg.churned is None and seg.churn_rate_pct is None

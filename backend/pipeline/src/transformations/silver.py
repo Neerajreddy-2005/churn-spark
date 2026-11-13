@@ -44,7 +44,8 @@ def build_silver(bronze_df):
         F.when(blank_new, F.lit(0.0))
         .otherwise(F.expr("try_cast(trim(TotalCharges) AS DOUBLE)"))
         .alias("total_charges"),
-        _yes("Churn").alias("churn"),
+        # Unlabelled file (no Churn column): churn stays null, never False.
+        (_yes("Churn") if "Churn" in bronze_df.columns else F.lit(None).cast("boolean")).alias("churn"),
         blank_new.alias("total_charges_imputed"),
         *METADATA_COLUMNS,
     )
