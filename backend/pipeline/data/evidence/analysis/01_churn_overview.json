@@ -1,0 +1,13 @@
+{
+  "query": "01_churn_overview.sql",
+  "database": "churn_db",
+  "run_timestamp": "2026-11-12T16:02:41.963160+05:30",
+  "rows": [
+    {
+      "snapshot_month": "2026-10",
+      "customers": 7043,
+      "churned": 1869,
+      "churn_rate_pct": "26.54"
+    }
+  ]
+}

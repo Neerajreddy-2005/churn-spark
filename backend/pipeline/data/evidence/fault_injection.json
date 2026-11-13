@@ -1,0 +1,197 @@
+{
+  "run_timestamp": "2026-11-12T15:49:56.788854+05:30",
+  "seed": 42,
+  "n_per_rule": 25,
+  "pipeline_blocked": true,
+  "rules": [
+    {
+      "rule_id": "dq01",
+      "targeted": false,
+      "injected": 0,
+      "expected": 0,
+      "detected": 0,
+      "detection_rate": null,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq02",
+      "targeted": false,
+      "injected": 0,
+      "expected": 0,
+      "detected": 0,
+      "detection_rate": null,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq03",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq04",
+      "targeted": true,
+      "injected": 25,
+      "expected": 50,
+      "detected": 50,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq05a",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq05b",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq06a",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq06b",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq06c",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq06d",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq06e",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq07",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq08",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq09",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq10",
+      "targeted": false,
+      "injected": 0,
+      "expected": 11,
+      "detected": 11,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq11",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq11b",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq12",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq13",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    },
+    {
+      "rule_id": "dq14",
+      "targeted": true,
+      "injected": 25,
+      "expected": 25,
+      "detected": 25,
+      "detection_rate": 1.0,
+      "exact_match": true
+    }
+  ],
+  "overall": {
+    "rules_checked": 20,
+    "rules_exact_match": 20,
+    "rules_targeted": 17,
+    "targeted_exact_match": 17,
+    "total_injected": 425,
+    "total_expected_failing_rows": 450,
+    "total_detected_failing_rows": 450
+  }
+}

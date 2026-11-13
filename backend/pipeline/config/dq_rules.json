@@ -1,0 +1,261 @@
+[
+  {
+    "id": "dq01",
+    "description": "Schema: all expected columns present, no extras",
+    "type": "schema",
+    "columns": [],
+    "action": "fail",
+    "max_failing_rate": 0.0
+  },
+  {
+    "id": "dq02",
+    "description": "Row count at least 1",
+    "type": "row_count_min",
+    "columns": [],
+    "action": "fail",
+    "max_failing_rate": 0.0,
+    "min_rows": 1
+  },
+  {
+    "id": "dq03",
+    "description": "customerID not null or blank",
+    "type": "not_null",
+    "columns": [
+      "customerID"
+    ],
+    "action": "fail",
+    "max_failing_rate": 0.0,
+    "treat_blank_as_null": true
+  },
+  {
+    "id": "dq04",
+    "description": "customerID unique",
+    "type": "unique",
+    "columns": [
+      "customerID"
+    ],
+    "action": "fail",
+    "max_failing_rate": 0.0
+  },
+  {
+    "id": "dq05a",
+    "description": "gender in allowed set",
+    "type": "allowed_values",
+    "columns": [
+      "gender"
+    ],
+    "action": "fail",
+    "max_failing_rate": 0.0,
+    "values": [
+      "Male",
+      "Female"
+    ]
+  },
+  {
+    "id": "dq05b",
+    "description": "Yes/No columns in allowed set",
+    "type": "allowed_values",
+    "columns": [
+      "Partner",
+      "Dependents",
+      "PhoneService",
+      "PaperlessBilling",
+      "Churn"
+    ],
+    "action": "fail",
+    "max_failing_rate": 0.0,
+    "values": [
+      "Yes",
+      "No"
+    ]
+  },
+  {
+    "id": "dq06a",
+    "description": "MultipleLines in allowed set",
+    "type": "allowed_values",
+    "columns": [
+      "MultipleLines"
+    ],
+    "action": "fail",
+    "max_failing_rate": 0.0,
+    "values": [
+      "Yes",
+      "No",
+      "No phone service"
+    ]
+  },
+  {
+    "id": "dq06b",
+    "description": "InternetService in allowed set",
+    "type": "allowed_values",
+    "columns": [
+      "InternetService"
+    ],
+    "action": "fail",
+    "max_failing_rate": 0.0,
+    "values": [
+      "DSL",
+      "Fiber optic",
+      "No"
+    ]
+  },
+  {
+    "id": "dq06c",
+    "description": "Add-on columns in allowed set",
+    "type": "allowed_values",
+    "columns": [
+      "OnlineSecurity",
+      "OnlineBackup",
+      "DeviceProtection",
+      "TechSupport",
+      "StreamingTV",
+      "StreamingMovies"
+    ],
+    "action": "fail",
+    "max_failing_rate": 0.0,
+    "values": [
+      "Yes",
+      "No",
+      "No internet service"
+    ]
+  },
+  {
+    "id": "dq06d",
+    "description": "Contract in allowed set",
+    "type": "allowed_values",
+    "columns": [
+      "Contract"
+    ],
+    "action": "fail",
+    "max_failing_rate": 0.0,
+    "values": [
+      "Month-to-month",
+      "One year",
+      "Two year"
+    ]
+  },
+  {
+    "id": "dq06e",
+    "description": "PaymentMethod in allowed set",
+    "type": "allowed_values",
+    "columns": [
+      "PaymentMethod"
+    ],
+    "action": "fail",
+    "max_failing_rate": 0.0,
+    "values": [
+      "Electronic check",
+      "Mailed check",
+      "Bank transfer (automatic)",
+      "Credit card (automatic)"
+    ]
+  },
+  {
+    "id": "dq07",
+    "description": "SeniorCitizen in {0, 1}",
+    "type": "allowed_values",
+    "columns": [
+      "SeniorCitizen"
+    ],
+    "action": "fail",
+    "max_failing_rate": 0.0,
+    "values": [
+      "0",
+      "1"
+    ]
+  },
+  {
+    "id": "dq08",
+    "description": "tenure is an integer in 0..72",
+    "type": "int_range",
+    "columns": [
+      "tenure"
+    ],
+    "action": "fail",
+    "max_failing_rate": 0.0,
+    "min": 0,
+    "max": 72
+  },
+  {
+    "id": "dq09",
+    "description": "MonthlyCharges numeric within 18.25..118.75",
+    "type": "numeric_range",
+    "columns": [
+      "MonthlyCharges"
+    ],
+    "action": "fail",
+    "max_failing_rate": 0.0,
+    "min": 18.25,
+    "max": 118.75
+  },
+  {
+    "id": "dq10",
+    "description": "TotalCharges blank on a row with tenure = 0",
+    "type": "expression",
+    "columns": [
+      "TotalCharges"
+    ],
+    "action": "fix",
+    "max_failing_rate": 0.0,
+    "failing_condition": "trim(TotalCharges) = '' AND tenure = '0'"
+  },
+  {
+    "id": "dq11",
+    "description": "TotalCharges blank on a row with tenure > 0",
+    "type": "expression",
+    "columns": [
+      "TotalCharges"
+    ],
+    "action": "fail",
+    "max_failing_rate": 0.0,
+    "failing_condition": "trim(TotalCharges) = '' AND tenure <> '0'"
+  },
+  {
+    "id": "dq11b",
+    "description": "TotalCharges non-blank but not numeric",
+    "type": "expression",
+    "columns": [
+      "TotalCharges"
+    ],
+    "action": "fail",
+    "max_failing_rate": 0.0,
+    "failing_condition": "trim(TotalCharges) <> '' AND try_cast(trim(TotalCharges) AS DOUBLE) IS NULL"
+  },
+  {
+    "id": "dq12",
+    "description": "InternetService = No implies add-ons = No internet service",
+    "type": "expression",
+    "columns": [
+      "OnlineSecurity",
+      "OnlineBackup",
+      "DeviceProtection",
+      "TechSupport",
+      "StreamingTV",
+      "StreamingMovies"
+    ],
+    "action": "warn",
+    "max_failing_rate": 0.0,
+    "failing_condition": "InternetService = 'No' AND (OnlineSecurity <> 'No internet service' OR OnlineBackup <> 'No internet service' OR DeviceProtection <> 'No internet service' OR TechSupport <> 'No internet service' OR StreamingTV <> 'No internet service' OR StreamingMovies <> 'No internet service')"
+  },
+  {
+    "id": "dq13",
+    "description": "PhoneService = No implies MultipleLines = No phone service",
+    "type": "expression",
+    "columns": [
+      "MultipleLines"
+    ],
+    "action": "warn",
+    "max_failing_rate": 0.0,
+    "failing_condition": "PhoneService = 'No' AND MultipleLines <> 'No phone service'"
+  },
+  {
+    "id": "dq14",
+    "description": "No null values in any raw column",
+    "type": "not_null",
+    "columns": [
+      "*"
+    ],
+    "action": "fail",
+    "max_failing_rate": 0.0
+  }
+]

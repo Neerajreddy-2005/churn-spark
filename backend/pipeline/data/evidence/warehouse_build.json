@@ -1,0 +1,13 @@
+{
+  "run_id": "2734707e9e38439fbda4e7daece61d4a",
+  "snapshot_month": "2026-10",
+  "timestamp": "2026-11-12T14:26:43.881805+05:30",
+  "rows": {
+    "dim_customer": 7043,
+    "dim_service_profile": 2386,
+    "dim_date": 4018,
+    "fact_customer_snapshot": 7043,
+    "fact_customer_snapshot_month": 7043
+  },
+  "seconds": 55.0
+}

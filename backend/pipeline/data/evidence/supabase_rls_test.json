@@ -1,0 +1,260 @@
+{
+  "timestamp": "2026-11-13T13:50:54.291958+05:30",
+  "assertions": 63,
+  "passed": 63,
+  "failed": 0,
+  "results": [
+    {
+      "name": "organisations: select returns only own org rows",
+      "passed": true
+    },
+    {
+      "name": "organisations: other org's rows not visible by filter",
+      "passed": true
+    },
+    {
+      "name": "profiles: select returns only own org rows",
+      "passed": true
+    },
+    {
+      "name": "profiles: other org's rows not visible by filter",
+      "passed": true
+    },
+    {
+      "name": "uploads: select returns only own org rows",
+      "passed": true
+    },
+    {
+      "name": "uploads: other org's rows not visible by filter",
+      "passed": true
+    },
+    {
+      "name": "pipeline_runs: select returns only own org rows",
+      "passed": true
+    },
+    {
+      "name": "pipeline_runs: other org's rows not visible by filter",
+      "passed": true
+    },
+    {
+      "name": "dq_results: select returns only own org rows",
+      "passed": true
+    },
+    {
+      "name": "dq_results: other org's rows not visible by filter",
+      "passed": true
+    },
+    {
+      "name": "reconciliation_results: select returns only own org rows",
+      "passed": true
+    },
+    {
+      "name": "reconciliation_results: other org's rows not visible by filter",
+      "passed": true
+    },
+    {
+      "name": "customer_scores: select returns only own org rows",
+      "passed": true
+    },
+    {
+      "name": "customer_scores: other org's rows not visible by filter",
+      "passed": true
+    },
+    {
+      "name": "segment_aggregates: select returns only own org rows",
+      "passed": true
+    },
+    {
+      "name": "segment_aggregates: other org's rows not visible by filter",
+      "passed": true
+    },
+    {
+      "name": "retention_actions: select returns only own org rows",
+      "passed": true
+    },
+    {
+      "name": "retention_actions: other org's rows not visible by filter",
+      "passed": true
+    },
+    {
+      "name": "customer_scores: insert denied",
+      "passed": true
+    },
+    {
+      "name": "pipeline_runs: insert denied",
+      "passed": true
+    },
+    {
+      "name": "dq_results: insert denied",
+      "passed": true
+    },
+    {
+      "name": "reconciliation_results: insert denied",
+      "passed": true
+    },
+    {
+      "name": "segment_aggregates: insert denied",
+      "passed": true
+    },
+    {
+      "name": "uploads: insert for org B denied",
+      "passed": true
+    },
+    {
+      "name": "uploads: file_path under org B folder denied",
+      "passed": true
+    },
+    {
+      "name": "uploads: status 'done' denied",
+      "passed": true
+    },
+    {
+      "name": "uploads: uploaded_by another user denied",
+      "passed": true
+    },
+    {
+      "name": "retention_actions: insert for org B denied",
+      "passed": true
+    },
+    {
+      "name": "retention_actions: created_by another user denied",
+      "passed": true
+    },
+    {
+      "name": "retention_actions: update of org B's row affects 0 rows",
+      "passed": true
+    },
+    {
+      "name": "profiles: update own role denied",
+      "passed": true
+    },
+    {
+      "name": "organisations: delete denied",
+      "passed": true
+    },
+    {
+      "name": "profiles: delete denied",
+      "passed": true
+    },
+    {
+      "name": "uploads: delete denied",
+      "passed": true
+    },
+    {
+      "name": "pipeline_runs: delete denied",
+      "passed": true
+    },
+    {
+      "name": "dq_results: delete denied",
+      "passed": true
+    },
+    {
+      "name": "reconciliation_results: delete denied",
+      "passed": true
+    },
+    {
+      "name": "customer_scores: delete denied",
+      "passed": true
+    },
+    {
+      "name": "segment_aggregates: delete denied",
+      "passed": true
+    },
+    {
+      "name": "retention_actions: delete denied",
+      "passed": true
+    },
+    {
+      "name": "uploads: valid insert for own org allowed",
+      "passed": true
+    },
+    {
+      "name": "retention_actions: valid insert for own org allowed",
+      "passed": true
+    },
+    {
+      "name": "retention_actions: valid insert stored",
+      "passed": true
+    },
+    {
+      "name": "storage: upload under own org folder allowed",
+      "passed": true
+    },
+    {
+      "name": "storage: uploaded file readable by worker key",
+      "passed": true
+    },
+    {
+      "name": "storage: upload under org B folder denied",
+      "passed": true
+    },
+    {
+      "name": "storage: anonymous upload denied",
+      "passed": true
+    },
+    {
+      "name": "retention_actions: customer without a score row denied",
+      "passed": true
+    },
+    {
+      "name": "retention_actions: customer scored only in org B denied",
+      "passed": true
+    },
+    {
+      "name": "customer_scores: unknown org_id rejected by foreign key (JDBC)",
+      "passed": true
+    },
+    {
+      "name": "uploads: inserts up to the 20 limit allowed",
+      "passed": true
+    },
+    {
+      "name": "uploads: 21st insert in 24h denied",
+      "passed": true
+    },
+    {
+      "name": "storage: uploads up to the 20 limit allowed",
+      "passed": true
+    },
+    {
+      "name": "storage: 21st object in 24h denied",
+      "passed": true
+    },
+    {
+      "name": "organisations: anonymous sees nothing",
+      "passed": true
+    },
+    {
+      "name": "profiles: anonymous sees nothing",
+      "passed": true
+    },
+    {
+      "name": "uploads: anonymous sees nothing",
+      "passed": true
+    },
+    {
+      "name": "pipeline_runs: anonymous sees nothing",
+      "passed": true
+    },
+    {
+      "name": "dq_results: anonymous sees nothing",
+      "passed": true
+    },
+    {
+      "name": "reconciliation_results: anonymous sees nothing",
+      "passed": true
+    },
+    {
+      "name": "customer_scores: anonymous sees nothing",
+      "passed": true
+    },
+    {
+      "name": "segment_aggregates: anonymous sees nothing",
+      "passed": true
+    },
+    {
+      "name": "retention_actions: anonymous sees nothing",
+      "passed": true
+    }
+  ]
+}

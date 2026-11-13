@@ -1,0 +1,528 @@
+{
+  "timestamp": "2026-11-13T13:51:49.824711+05:30",
+  "assertions": 130,
+  "passed": 130,
+  "failed": 0,
+  "results": [
+    {
+      "name": "create_user: manager gets 200 with user_id and temporary password",
+      "passed": true
+    },
+    {
+      "name": "create_user: org_id in body ignored, user lands in manager's org",
+      "passed": true
+    },
+    {
+      "name": "create_user: profile has role, email, must_change_password=true",
+      "passed": true
+    },
+    {
+      "name": "create_user: temporary password works for sign-in",
+      "passed": true
+    },
+    {
+      "name": "create_user: audit row written, no password in details",
+      "passed": true
+    },
+    {
+      "name": "create_user: role 'admin' rejected (400)",
+      "passed": true
+    },
+    {
+      "name": "create_user: bad email rejected (400)",
+      "passed": true
+    },
+    {
+      "name": "unknown action rejected (400)",
+      "passed": true
+    },
+    {
+      "name": "analyst calling create_user -> 403",
+      "passed": true
+    },
+    {
+      "name": "analyst calling set_role -> 403",
+      "passed": true
+    },
+    {
+      "name": "analyst calling deactivate_user -> 403",
+      "passed": true
+    },
+    {
+      "name": "analyst calling reset_password -> 403",
+      "passed": true
+    },
+    {
+      "name": "analyst calling create_org -> 403",
+      "passed": true
+    },
+    {
+      "name": "unauthenticated call -> 401",
+      "passed": true
+    },
+    {
+      "name": "disallowed origin rejected, nothing created",
+      "passed": true
+    },
+    {
+      "name": "allowed origin accepted",
+      "passed": true
+    },
+    {
+      "name": "manager cannot set_role a user of another org (403/404)",
+      "passed": true
+    },
+    {
+      "name": "manager cannot deactivate_user a user of another org (403/404)",
+      "passed": true
+    },
+    {
+      "name": "manager cannot reset_password a user of another org (403/404)",
+      "passed": true
+    },
+    {
+      "name": "other org's manager unchanged",
+      "passed": true
+    },
+    {
+      "name": "manager set_role on self -> 403 (platform admin only)",
+      "passed": true
+    },
+    {
+      "name": "manager cannot deactivate self (400)",
+      "passed": true
+    },
+    {
+      "name": "manager reset_password on self -> 403",
+      "passed": true
+    },
+    {
+      "name": "platform admin creates a second manager in org A",
+      "passed": true
+    },
+    {
+      "name": "manager create_user role=manager -> 403 forbidden_role, nothing created",
+      "passed": true
+    },
+    {
+      "name": "manager create_user role=analyst -> 200",
+      "passed": true
+    },
+    {
+      "name": "manager set_role on analyst -> 403, role unchanged",
+      "passed": true
+    },
+    {
+      "name": "manager deactivate another manager in own org -> 403, still active",
+      "passed": true
+    },
+    {
+      "name": "manager reactivate another manager -> 403",
+      "passed": true
+    },
+    {
+      "name": "manager deactivate analyst -> 200, then reactivate -> 200",
+      "passed": true
+    },
+    {
+      "name": "manager reset_password on analyst -> 403, flag unchanged",
+      "passed": true
+    },
+    {
+      "name": "manager set_name on analyst -> 200",
+      "passed": true
+    },
+    {
+      "name": "manager set_name on other manager -> 403, name unchanged",
+      "passed": true
+    },
+    {
+      "name": "manager set_name on self -> 200",
+      "passed": true
+    },
+    {
+      "name": "platform admin set_role (analyst->manager->analyst) works",
+      "passed": true
+    },
+    {
+      "name": "platform admin can deactivate/reactivate a manager",
+      "passed": true
+    },
+    {
+      "name": "platform admin can rename a manager",
+      "passed": true
+    },
+    {
+      "name": "platform admin reset_password (break-glass): 200, new password works, flag set",
+      "passed": true
+    },
+    {
+      "name": "set_name: manager renames an analyst in own org",
+      "passed": true
+    },
+    {
+      "name": "set_name: manager may rename self",
+      "passed": true
+    },
+    {
+      "name": "set_name: cross-org denied (403/404), name unchanged",
+      "passed": true
+    },
+    {
+      "name": "set_name: analyst denied (403), even for self",
+      "passed": true
+    },
+    {
+      "name": "set_name: empty name rejected (400)",
+      "passed": true
+    },
+    {
+      "name": "set_name: 101-char name rejected (400)",
+      "passed": true
+    },
+    {
+      "name": "whoami: platform admin true, no org, aal2 / manager false, has org",
+      "passed": true
+    },
+    {
+      "name": "whoami works at aal1 for the admin (reports aal1)",
+      "passed": true
+    },
+    {
+      "name": "create_org by manager -> 403",
+      "passed": true
+    },
+    {
+      "name": "create_org by platform admin -> 200, first manager created in new org",
+      "passed": true
+    },
+    {
+      "name": "platform admin can create a user in a named org",
+      "passed": true
+    },
+    {
+      "name": "platform admin must name an org (400)",
+      "passed": true
+    },
+    {
+      "name": "platform admin set_role without org_id (400)",
+      "passed": true
+    },
+    {
+      "name": "platform admin set_role with the wrong org_id (404)",
+      "passed": true
+    },
+    {
+      "name": "platform admin deactivate_user without org_id (400)",
+      "passed": true
+    },
+    {
+      "name": "platform admin deactivate_user with the wrong org_id (404)",
+      "passed": true
+    },
+    {
+      "name": "platform admin reset_password without org_id (400)",
+      "passed": true
+    },
+    {
+      "name": "platform admin reset_password with the wrong org_id (404)",
+      "passed": true
+    },
+    {
+      "name": "create_user refuses an email that belongs to a platform admin (409)",
+      "passed": true
+    },
+    {
+      "name": "platform admin can create a manager in a named org",
+      "passed": true
+    },
+    {
+      "name": "platform admin can deactivate a member of another org",
+      "passed": true
+    },
+    {
+      "name": "platform admin can reset a password in another org",
+      "passed": true
+    },
+    {
+      "name": "platform admin set_name needs org_id (400) and works with it",
+      "passed": true
+    },
+    {
+      "name": "admin at aal1: function 403 mfa_required",
+      "passed": true
+    },
+    {
+      "name": "admin at aal1: create_org 403 mfa_required",
+      "passed": true
+    },
+    {
+      "name": "admin at aal1: organisations returns 0 rows",
+      "passed": true
+    },
+    {
+      "name": "admin at aal1: profiles returns 0 rows",
+      "passed": true
+    },
+    {
+      "name": "admin at aal1: audit_log returns 0 rows",
+      "passed": true
+    },
+    {
+      "name": "admin aal2: lists all organisations",
+      "passed": true
+    },
+    {
+      "name": "admin aal2: reads members of any org",
+      "passed": true
+    },
+    {
+      "name": "admin aal2: reads members of any org",
+      "passed": true
+    },
+    {
+      "name": "admin aal2: audit_log across orgs",
+      "passed": true
+    },
+    {
+      "name": "admin aal2: customer_scores returns 0 rows",
+      "passed": true
+    },
+    {
+      "name": "admin aal2: segment_aggregates returns 0 rows",
+      "passed": true
+    },
+    {
+      "name": "admin aal2: uploads returns 0 rows",
+      "passed": true
+    },
+    {
+      "name": "admin aal2: pipeline_runs returns 0 rows",
+      "passed": true
+    },
+    {
+      "name": "admin aal2: dq_results returns 0 rows",
+      "passed": true
+    },
+    {
+      "name": "admin aal2: reconciliation_results returns 0 rows",
+      "passed": true
+    },
+    {
+      "name": "admin aal2: retention_actions returns 0 rows",
+      "passed": true
+    },
+    {
+      "name": "seeded business rows exist for the org's own manager (sanity)",
+      "passed": true
+    },
+    {
+      "name": "trigger: profile for a platform admin is rejected",
+      "passed": true
+    },
+    {
+      "name": "trigger: platform_admins row for an org member is rejected",
+      "passed": true
+    },
+    {
+      "name": "make-platform-admin CLI refuses an account with a profile",
+      "passed": true
+    },
+    {
+      "name": "create-platform-admin CLI refuses an existing email",
+      "passed": true
+    },
+    {
+      "name": "manager cannot read other orgs' profiles",
+      "passed": true
+    },
+    {
+      "name": "manager cannot read other orgs' audit_log",
+      "passed": true
+    },
+    {
+      "name": "victim sees org rows before deactivation",
+      "passed": true
+    },
+    {
+      "name": "deactivate_user: 200 and profile inactive",
+      "passed": true
+    },
+    {
+      "name": "deactivated user cannot sign in",
+      "passed": true
+    },
+    {
+      "name": "deactivated user's existing session sees no rows (current_org_id null)",
+      "passed": true
+    },
+    {
+      "name": "deactivated user can still read own profile (to show the message)",
+      "passed": true
+    },
+    {
+      "name": "deactivated user cannot call the function",
+      "passed": true
+    },
+    {
+      "name": "reactivate_user: user can sign in again",
+      "passed": true
+    },
+    {
+      "name": "flag is true before the password change",
+      "passed": true
+    },
+    {
+      "name": "profiles: update own role denied",
+      "passed": true
+    },
+    {
+      "name": "profiles: update own is_active denied",
+      "passed": true
+    },
+    {
+      "name": "profiles: update own org_id denied",
+      "passed": true
+    },
+    {
+      "name": "profiles: update own email denied",
+      "passed": true
+    },
+    {
+      "name": "profiles: update own must_change_password denied",
+      "passed": true
+    },
+    {
+      "name": "profiles: own must_change_password still true after denied update",
+      "passed": true
+    },
+    {
+      "name": "profiles: cannot touch another profile",
+      "passed": true
+    },
+    {
+      "name": "flag true: customer_scores returns 0 rows",
+      "passed": true
+    },
+    {
+      "name": "flag true: uploads returns 0 rows",
+      "passed": true
+    },
+    {
+      "name": "flag true: organisations returns 0 rows",
+      "passed": true
+    },
+    {
+      "name": "flag true: audit_log returns 0 rows",
+      "passed": true
+    },
+    {
+      "name": "flag true: user can read own profile row",
+      "passed": true
+    },
+    {
+      "name": "flag true: user sees only own profile (no org-wide read)",
+      "passed": true
+    },
+    {
+      "name": "password change via Auth API succeeds",
+      "passed": true
+    },
+    {
+      "name": "password change clears must_change_password (trigger)",
+      "passed": true
+    },
+    {
+      "name": "after password change the user sees org rows",
+      "passed": true
+    },
+    {
+      "name": "after password change the user sees org uploads",
+      "passed": true
+    },
+    {
+      "name": "profiles: user cannot write the flag at all",
+      "passed": true
+    },
+    {
+      "name": "reset_password after a change: flag true again (final state)",
+      "passed": true
+    },
+    {
+      "name": "audit_log: manager sees own org's entries only",
+      "passed": true
+    },
+    {
+      "name": "audit_log: analyst sees nothing",
+      "passed": true
+    },
+    {
+      "name": "audit_log: other org's manager sees no entries of org A",
+      "passed": true
+    },
+    {
+      "name": "audit_log: insert denied for managers",
+      "passed": true
+    },
+    {
+      "name": "audit_log: anonymous sees nothing",
+      "passed": true
+    },
+    {
+      "name": "private.platform_admins not reachable through the Data API",
+      "passed": true
+    },
+    {
+      "name": "admin_is_platform_admin not callable by users",
+      "passed": true
+    },
+    {
+      "name": "manager sees only own organisation",
+      "passed": true
+    },
+    {
+      "name": "audit: every row the function wrote has actor_label",
+      "passed": true
+    },
+    {
+      "name": "audit: manager actor_label is display name or email",
+      "passed": true
+    },
+    {
+      "name": "audit: create_user target_label is the new user's name",
+      "passed": true
+    },
+    {
+      "name": "audit: set_name row carries the new name as target_label",
+      "passed": true
+    },
+    {
+      "name": "audit: set_role / reset_password rows have target_label",
+      "passed": true
+    },
+    {
+      "name": "audit: platform admin actor_label is 'Platform admin (<email>)'",
+      "passed": true
+    },
+    {
+      "name": "audit: no password appears in any details",
+      "passed": true
+    },
+    {
+      "name": "backfill precondition: old profile has no email",
+      "passed": true
+    },
+    {
+      "name": "backfill: old profile now carries the auth email",
+      "passed": true
+    },
+    {
+      "name": "backfill: existing emails untouched",
+      "passed": true
+    },
+    {
+      "name": "create_user: 51st in 24h -> 429",
+      "passed": true
+    }
+  ]
+}

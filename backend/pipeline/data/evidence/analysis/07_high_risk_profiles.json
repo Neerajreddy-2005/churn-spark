@@ -1,0 +1,107 @@
+{
+  "query": "07_high_risk_profiles.sql",
+  "database": "churn_db",
+  "run_timestamp": "2026-11-12T16:02:41.963160+05:30",
+  "rows": [
+    {
+      "contract": "Month-to-month",
+      "internet_service": "Fiber optic",
+      "payment_method": "Electronic check",
+      "tech_support": "No",
+      "online_security": "No",
+      "customers": 989,
+      "churned": 651,
+      "churn_rate_pct": "65.82"
+    },
+    {
+      "contract": "Month-to-month",
+      "internet_service": "DSL",
+      "payment_method": "Electronic check",
+      "tech_support": "No",
+      "online_security": "No",
+      "customers": 282,
+      "churned": 137,
+      "churn_rate_pct": "48.58"
+    },
+    {
+      "contract": "Month-to-month",
+      "internet_service": "Fiber optic",
+      "payment_method": "Bank transfer (automatic)",
+      "tech_support": "No",
+      "online_security": "No",
+      "customers": 212,
+      "churned": 110,
+      "churn_rate_pct": "51.89"
+    },
+    {
+      "contract": "Month-to-month",
+      "internet_service": "Fiber optic",
+      "payment_method": "Credit card (automatic)",
+      "tech_support": "No",
+      "online_security": "No",
+      "customers": 186,
+      "churned": 88,
+      "churn_rate_pct": "47.31"
+    },
+    {
+      "contract": "Month-to-month",
+      "internet_service": "Fiber optic",
+      "payment_method": "Mailed check",
+      "tech_support": "No",
+      "online_security": "No",
+      "customers": 137,
+      "churned": 76,
+      "churn_rate_pct": "55.47"
+    },
+    {
+      "contract": "Month-to-month",
+      "internet_service": "DSL",
+      "payment_method": "Mailed check",
+      "tech_support": "No",
+      "online_security": "No",
+      "customers": 193,
+      "churned": 76,
+      "churn_rate_pct": "39.38"
+    },
+    {
+      "contract": "Month-to-month",
+      "internet_service": "No",
+      "payment_method": "Mailed check",
+      "tech_support": "No internet service",
+      "online_security": "No internet service",
+      "customers": 325,
+      "churned": 67,
+      "churn_rate_pct": "20.62"
+    },
+    {
+      "contract": "Month-to-month",
+      "internet_service": "Fiber optic",
+      "payment_method": "Electronic check",
+      "tech_support": "Yes",
+      "online_security": "No",
+      "customers": 139,
+      "churned": 65,
+      "churn_rate_pct": "46.76"
+    },
+    {
+      "contract": "Month-to-month",
+      "internet_service": "Fiber optic",
+      "payment_method": "Electronic check",
+      "tech_support": "No",
+      "online_security": "Yes",
+      "customers": 149,
+      "churned": 65,
+      "churn_rate_pct": "43.62"
+    },
+    {
+      "contract": "Month-to-month",
+      "internet_service": "DSL",
+      "payment_method": "Electronic check",
+      "tech_support": "No",
+      "online_security": "Yes",
+      "customers": 83,
+      "churned": 25,
+      "churn_rate_pct": "30.12"
+    }
+  ]
+}

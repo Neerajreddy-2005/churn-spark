@@ -1,0 +1,79 @@
+{
+  "query": "03_contract_internet_matrix.sql",
+  "database": "churn_db",
+  "run_timestamp": "2026-11-12T16:02:41.963160+05:30",
+  "rows": [
+    {
+      "contract": "Month-to-month",
+      "internet_service": "Fiber optic",
+      "customers": 2128,
+      "churned": 1162,
+      "churn_rate_pct": "54.61",
+      "rate_rank": 1
+    },
+    {
+      "contract": "Month-to-month",
+      "internet_service": "DSL",
+      "customers": 1223,
+      "churned": 394,
+      "churn_rate_pct": "32.22",
+      "rate_rank": 2
+    },
+    {
+      "contract": "One year",
+      "internet_service": "Fiber optic",
+      "customers": 539,
+      "churned": 104,
+      "churn_rate_pct": "19.29",
+      "rate_rank": 3
+    },
+    {
+      "contract": "Month-to-month",
+      "internet_service": "No",
+      "customers": 524,
+      "churned": 99,
+      "churn_rate_pct": "18.89",
+      "rate_rank": 4
+    },
+    {
+      "contract": "One year",
+      "internet_service": "DSL",
+      "customers": 570,
+      "churned": 53,
+      "churn_rate_pct": "9.30",
+      "rate_rank": 5
+    },
+    {
+      "contract": "Two year",
+      "internet_service": "Fiber optic",
+      "customers": 429,
+      "churned": 31,
+      "churn_rate_pct": "7.23",
+      "rate_rank": 6
+    },
+    {
+      "contract": "One year",
+      "internet_service": "No",
+      "customers": 364,
+      "churned": 9,
+      "churn_rate_pct": "2.47",
+      "rate_rank": 7
+    },
+    {
+      "contract": "Two year",
+      "internet_service": "DSL",
+      "customers": 628,
+      "churned": 12,
+      "churn_rate_pct": "1.91",
+      "rate_rank": 8
+    },
+    {
+      "contract": "Two year",
+      "internet_service": "No",
+      "customers": 638,
+      "churned": 5,
+      "churn_rate_pct": "0.78",
+      "rate_rank": 9
+    }
+  ]
+}

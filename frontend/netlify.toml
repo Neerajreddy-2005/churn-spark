@@ -1,0 +1,34 @@
+# Netlify config for the Churn-Spark website (set the site's base directory to "frontend").
+# VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY are set in the Netlify UI (Site settings > Environment
+# variables). Only the publishable key goes there; the secret key never leaves the laptop worker.
+
+[build]
+  command = "npm ci && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Single-page app: every route serves index.html.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Scripts and fonts only from this site; data only to our Supabase project. Inline style attributes are
+    # needed by React (style={{...}}); no inline scripts are used (theme-init.js is a file).
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://mknvrbjrbmuqyoahokgu.supabase.co wss://mknvrbjrbmuqyoahokgu.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+
+# Hashed build assets never change: cache for a year. index.html is always revalidated.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

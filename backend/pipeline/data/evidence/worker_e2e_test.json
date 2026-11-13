@@ -1,0 +1,102 @@
+{
+  "timestamp": "2026-11-13T13:55:39.857145+05:30",
+  "worker_run_seconds": {
+    "real_csv_2026-10": 99.1,
+    "faulty_csv_2026-11": 17.6,
+    "reprocess_2026-10": 64.3
+  },
+  "assertions": 22,
+  "passed": 22,
+  "failed": 0,
+  "results": [
+    {
+      "name": "real csv: one upload processed",
+      "passed": true
+    },
+    {
+      "name": "real csv: upload status done",
+      "passed": true
+    },
+    {
+      "name": "real csv: pipeline_runs row with dq fail = 0 and recon fail = 0",
+      "passed": true
+    },
+    {
+      "name": "real csv: 7043 customer_scores rows",
+      "passed": true
+    },
+    {
+      "name": "real csv: overall churned 1869 / customers 7043 / 26.54%",
+      "passed": true
+    },
+    {
+      "name": "real csv: overall mrr_lost equals CSV sum of churned MonthlyCharges",
+      "passed": true
+    },
+    {
+      "name": "real csv: 20 dq_results rows",
+      "passed": true
+    },
+    {
+      "name": "real csv: all reconciliation checks pass",
+      "passed": true
+    },
+    {
+      "name": "worker removed the downloaded input",
+      "passed": true
+    },
+    {
+      "name": "faulty csv: upload rejected",
+      "passed": true
+    },
+    {
+      "name": "faulty csv: status_reason lists failed rule ids",
+      "passed": true
+    },
+    {
+      "name": "faulty csv: dq_results stored for the rejected run",
+      "passed": true
+    },
+    {
+      "name": "faulty csv: no customer_scores for 2026-11",
+      "passed": true
+    },
+    {
+      "name": "reprocess: upload done",
+      "passed": true
+    },
+    {
+      "name": "reprocess: still exactly 7043 customer_scores rows",
+      "passed": true
+    },
+    {
+      "name": "reprocess: one overall aggregate row",
+      "passed": true
+    },
+    {
+      "name": "other org: uploads not readable",
+      "passed": true
+    },
+    {
+      "name": "other org: pipeline_runs not readable",
+      "passed": true
+    },
+    {
+      "name": "other org: dq_results not readable",
+      "passed": true
+    },
+    {
+      "name": "other org: reconciliation_results not readable",
+      "passed": true
+    },
+    {
+      "name": "other org: customer_scores not readable",
+      "passed": true
+    },
+    {
+      "name": "other org: segment_aggregates not readable",
+      "passed": true
+    }
+  ],
+  "cleanup_problems": 0
+}

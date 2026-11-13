@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-13T00:00:00Z",
+  "title": "Design System: Churn-Spark",
+  "extensions": {
+    "colorMeta": {
+      "cobalt": { "role": "primary", "displayName": "Cobalt", "canonical": "#2a54c4", "tonalRamp": ["#0f1f4d", "#17317a", "#2349ad", "#2a54c4", "#5b7fdb", "#7d9cf2", "#c9d6f6", "#e9eefa"] },
+      "frame": { "role": "secondary", "displayName": "Apricot Frame", "canonical": "#ffd49a", "tonalRamp": ["#33281a", "#5e4524", "#8f6a2f", "#c79a52", "#ffd49a", "#ffe0b8", "#ffedd6", "#fff6ea"] },
+      "risk": { "role": "tertiary", "displayName": "Risk Red", "canonical": "#b42318", "tonalRamp": ["#3a1d1a", "#5c1610", "#8a1a12", "#b42318", "#d9534a", "#f2675a", "#fdecea", "#fff5f4"] },
+      "sheet": { "role": "neutral", "displayName": "Near-White Sheet", "canonical": "#fffdf9", "tonalRamp": ["#1a1714", "#221e1a", "#34302a", "#645b4f", "#cdc5b8", "#ece5da", "#faf6ef", "#fffdf9"] },
+      "ink": { "role": "neutral", "displayName": "Warm Ink", "canonical": "#1e1810", "tonalRamp": ["#1e1810", "#3a3126", "#645b4f", "#887d6f", "#b8b1a7", "#cdc5b8", "#ece5da", "#f3efe9"] },
+      "ok": { "role": "neutral", "displayName": "Pass Green", "canonical": "#247b50", "tonalRamp": ["#17291f", "#145034", "#247b50", "#4cc985", "#7fdcaa", "#b7ecd0", "#e1f5e9", "#f2fbf6"] }
+    },
+    "typographyMeta": {
+      "title": { "displayName": "Title (Bricolage)", "purpose": "Page titles, wordmark, sign-in headline only." },
+      "headline": { "displayName": "Headline", "purpose": "h2 section headings." },
+      "section": { "displayName": "Section", "purpose": "Panel titles (h3)." },
+      "kpi": { "displayName": "KPI", "purpose": "Headline figures in the KPI strip." },
+      "body": { "displayName": "Body", "purpose": "Default text and tables, tabular numerals." },
+      "label": { "displayName": "Label", "purpose": "Field labels, table headers, notes." }
+    },
+    "shadows": [
+      { "name": "float", "value": "0 12px 32px rgba(44, 31, 11, 0.16), 0 2px 6px rgba(44, 31, 11, 0.08)", "purpose": "Menus, popovers, toasts, command palette, select listbox. Nothing else." },
+      { "name": "focus-glow", "value": "0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent)", "purpose": "Focused or open inputs and select triggers." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Arrivals: rises, menus opening, toasts, bars growing." },
+      { "name": "ease-in", "value": "cubic-bezier(0.6, 0, 0.9, 0.35)", "purpose": "Exits: closing menus, route fade-out." },
+      { "name": "ease-in-out", "value": "cubic-bezier(0.65, 0, 0.35, 1)", "purpose": "Shared-element moves (customer-id view transition), error shake." },
+      { "name": "t-fast", "value": "110ms", "purpose": "Hover and press feedback." },
+      { "name": "t-med", "value": "320ms", "purpose": "Toasts, chevrons, theme thumb." },
+      { "name": "t-slow", "value": "900ms", "purpose": "Bars growing from zero." },
+      { "name": "stagger-rise", "value": "560ms, 70ms step, 14px", "purpose": "Panels arriving on a page; fill-mode backwards." },
+      { "name": "row-rise", "value": "320ms, 22ms step capped at 12", "purpose": "Table rows after filtering." },
+      { "name": "toast-drain", "value": "5s linear", "purpose": "Undo window bar." },
+      { "name": "count-up", "value": "800ms once", "purpose": "KPI figures." }
+    ],
+    "breakpoints": [
+      { "name": "tablet", "value": "1100px" },
+      { "name": "phone", "value": "900px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single primary action per view; cobalt.",
+      "html": "<button class=\"ds-btn\">Log action</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;height:36px;padding:0 16px;font:700 13.5px 'Manrope Variable','Segoe UI',system-ui,sans-serif;border-radius:8px;border:1px solid transparent;background:var(--accent,#2a54c4);color:var(--on-accent,#fff);cursor:pointer;transition:background 110ms cubic-bezier(.16,1,.3,1),transform 110ms cubic-bezier(.16,1,.3,1)}.ds-btn:hover{background:var(--accent-hover,#2349ad)}.ds-btn:active{transform:translateY(1px) scale(.985)}.ds-btn:focus-visible{outline:2px solid var(--accent,#2a54c4);outline-offset:2px}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Neutral outline; also used for destructive admin actions (never red).",
+      "html": "<button class=\"ds-btn-2\">Cancel</button>",
+      "css": ".ds-btn-2{display:inline-flex;align-items:center;justify-content:center;height:36px;padding:0 16px;font:700 13.5px 'Manrope Variable','Segoe UI',system-ui,sans-serif;border-radius:8px;border:1px solid var(--control,#cdc5b8);background:var(--sheet,#fffdf9);color:var(--ink,#1e1810);cursor:pointer;transition:background 110ms}.ds-btn-2:hover{background:var(--raised,#faf6ef)}.ds-btn-2:focus-visible{outline:2px solid var(--accent,#2a54c4);outline-offset:2px}"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "36px field with cobalt focus glow.",
+      "html": "<input class=\"ds-input\" placeholder=\"Search customers\">",
+      "css": ".ds-input{height:36px;padding:0 11px;font:400 14px 'Manrope Variable','Segoe UI',system-ui,sans-serif;color:var(--ink,#1e1810);background:var(--sheet,#fffdf9);border:1px solid var(--control,#cdc5b8);border-radius:8px;transition:border-color 110ms,box-shadow 110ms}.ds-input:hover{border-color:#8f877a}.ds-input:focus-visible{outline:none;border-color:var(--accent,#2a54c4);box-shadow:0 0 0 3px color-mix(in oklab,var(--accent,#2a54c4) 22%,transparent)}"
+    },
+    {
+      "name": "Sidebar Link",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Frame navigation row; active state is a darker frame wash, not an accent.",
+      "html": "<a class=\"ds-nav active\" href=\"#\">Overview</a>",
+      "css": ".ds-nav{display:flex;align-items:center;height:36px;padding:0 10px;border-radius:8px;color:var(--frame-ink,#2c1f0b);text-decoration:none;font:600 13.5px 'Manrope Variable','Segoe UI',system-ui,sans-serif;opacity:.82;transition:background 110ms}.ds-nav:hover{opacity:1;background:var(--frame-soft,rgba(44,31,11,.07))}.ds-nav.active{opacity:1;background:var(--frame-active,rgba(44,31,11,.12))}"
+    },
+    {
+      "name": "Risk Pill",
+      "kind": "chip",
+      "refersTo": "pill-risk",
+      "description": "Status pill; text label always present. Red only for customer risk.",
+      "html": "<span class=\"ds-pill\"><i></i>High</span>",
+      "css": ".ds-pill{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border-radius:999px;font:700 12px 'Manrope Variable','Segoe UI',system-ui,sans-serif;color:var(--risk-ink,#8a1a12);background:var(--risk-tint,#fdecea)}.ds-pill i{width:6px;height:6px;border-radius:50%;background:currentColor}"
+    },
+    {
+      "name": "KPI Strip",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "One divided container of key figures, not separate tiles.",
+      "html": "<div class=\"ds-kpis\"><div class=\"ds-kpi\"><span>Customers</span><b>7,043</b></div><div class=\"ds-kpi\"><span>Churn rate</span><b>26.54%</b></div></div>",
+      "css": ".ds-kpis{display:grid;grid-template-columns:repeat(2,1fr);border:1px solid var(--line,#ece5da);border-radius:12px;background:var(--sheet,#fffdf9);font-family:'Manrope Variable','Segoe UI',system-ui,sans-serif;font-variant-numeric:tabular-nums}.ds-kpi{display:grid;gap:4px;padding:16px 18px}.ds-kpi+.ds-kpi{border-left:1px solid var(--line,#ece5da)}.ds-kpi span{font-size:12.5px;font-weight:500;color:var(--muted,#645b4f)}.ds-kpi b{font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1.15;color:var(--ink,#1e1810)}"
+    },
+    {
+      "name": "Data Bar",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Cobalt bar on cobalt-tint track; grows from zero.",
+      "html": "<div class=\"ds-bar\"><i></i></div>",
+      "css": ".ds-bar{display:block;width:240px;height:12px;border-radius:4px;background:var(--accent-tint,#e9eefa);overflow:hidden}.ds-bar i{display:block;width:62%;height:100%;border-radius:4px;background:var(--accent,#2a54c4);transform-origin:left;animation:ds-grow 900ms cubic-bezier(.16,1,.3,1) both}@keyframes ds-grow{from{transform:scaleX(0)}}"
+    },
+    {
+      "name": "Undo Toast",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Floating ink toast with an Undo action and a 5s cobalt drain bar.",
+      "html": "<div class=\"ds-toast\"><span>Action logged</span><button>Undo</button><i></i></div>",
+      "css": ".ds-toast{position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;min-width:280px;padding:10px 10px 10px 16px;background:var(--ink,#1e1810);color:var(--sheet,#fffdf9);border-radius:12px;box-shadow:0 12px 32px rgba(44,31,11,.16),0 2px 6px rgba(44,31,11,.08);font:600 13.5px 'Manrope Variable','Segoe UI',system-ui,sans-serif}.ds-toast span{flex:1}.ds-toast button{height:30px;padding:0 12px;border:0;border-radius:8px;background:rgba(255,253,249,.16);color:inherit;font:inherit;cursor:pointer}.ds-toast i{position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--accent,#2a54c4);transform-origin:left;animation:ds-drain 5s linear forwards}@keyframes ds-drain{to{transform:scaleX(0)}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Warm Workroom",
+    "overview": "An apricot frame holds the tools; a near-white sheet holds the work. The frame is the only place warmth is loud. Inside the sheet the palette goes quiet: warm-neutral ink and hairlines, cobalt for data and the single primary action, red reserved for a customer at risk.",
+    "keyCharacteristics": [
+      "Apricot L-frame + near-white sheet; no resting shadows.",
+      "Cobalt = data and the one primary action. Red = customer risk only.",
+      "Bricolage Grotesque for page titles, wordmark and sign-in headline only; Manrope with tabular figures for everything else.",
+      "Money has no currency symbol (the dataset has none); percentages show 2 decimals.",
+      "Motion has a fixed vocabulary of three easings and is fully reducible."
+    ],
+    "rules": [
+      { "name": "The Red-Means-Risk Rule", "body": "Red appears only for a customer at risk. Destructive admin actions are neutral outlines on purpose, protected by explicit steps rather than by colour.", "section": "colors" },
+      { "name": "The One Voice Rule", "body": "Cobalt marks data and the single primary action. The frame and chrome never take the accent colour.", "section": "colors" },
+      { "name": "The Not-By-Colour-Alone Rule", "body": "Every status pill carries a text label (and a dot); colour never carries status alone.", "section": "colors" },
+      { "name": "The Two-Face Rule", "body": "Bricolage is for page titles, the wordmark and the sign-in headline. Never for body, tables, buttons, labels or KPI figures.", "section": "typography" },
+      { "name": "The Tabular Rule", "body": "All figures use tabular numerals; numbers in tables are right-aligned.", "section": "typography" },
+      { "name": "The Float-Only Rule", "body": "No resting shadow on sheet, panels, KPI strip, buttons or table rows. Only elements that detach from the page take Float.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep red for customer risk only; use neutral outlines for destructive admin buttons.",
+      "Do use cobalt for data and exactly one primary action per view.",
+      "Do read colours from the CSS custom properties so light and dark both work; add dark values wherever you add a token.",
+      "Do keep the sheet and panels flat; use Float only for menus, popovers, toasts and the palette.",
+      "Do use Bricolage for titles and the wordmark only; Manrope with tabular figures elsewhere; right-align numbers.",
+      "Do show money without a currency symbol and percentages with 2 decimals.",
+      "Do use Undo toasts for reversible actions; keep security and admin actions explicit.",
+      "Do use the three named easings and respect reduced motion; keep content visible at rest."
+    ],
+    "donts": [
+      "Don't add icon-in-circle KPI tiles, sparklines, gradients, eyebrows, uppercase tracked headers, zebra tables or confirm() dialogs for reversible actions.",
+      "Don't put the accent colour on the frame or chrome.",
+      "Don't add resting shadows or glass; the only glass is the theme-switch thumb, by the user's request.",
+      "Don't show status by colour alone.",
+      "Don't add currency symbols.",
+      "Don't use a native <select> for filters; use the animated Select."
+    ]
+  }
+}

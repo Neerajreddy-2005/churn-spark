@@ -1,0 +1,12 @@
+name: churn-spark   # keeps the container name churn-spark-worker-1 now that this file lives in pipeline/
+services:
+  worker:
+    build: .
+    image: churn-spark-worker:local
+    env_file: .env            # Supabase settings; read at runtime, never baked into the image
+    volumes:
+      - ./data:/app/data      # uploads, per-run Delta outputs and evidence stay on your disk
+      - ./models:/app/models:ro
+    command: ["python", "-m", "src.integration.supabase_worker", "--poll", "60"]
+    restart: unless-stopped
+    mem_limit: 4g

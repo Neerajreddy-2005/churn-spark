@@ -1,0 +1,39 @@
+{
+  "query": "06_payment_method.sql",
+  "database": "churn_db",
+  "run_timestamp": "2026-11-12T16:02:41.963160+05:30",
+  "rows": [
+    {
+      "payment_method": "Electronic check",
+      "customers": 2365,
+      "churned": 1071,
+      "churn_rate_pct": "45.29",
+      "mrr_lost": "84288.75",
+      "share_of_churned_pct": "57.30"
+    },
+    {
+      "payment_method": "Mailed check",
+      "customers": 1612,
+      "churned": 308,
+      "churn_rate_pct": "19.11",
+      "mrr_lost": "16803.60",
+      "share_of_churned_pct": "16.48"
+    },
+    {
+      "payment_method": "Bank transfer (automatic)",
+      "customers": 1544,
+      "churned": 258,
+      "churn_rate_pct": "16.71",
+      "mrr_lost": "20091.90",
+      "share_of_churned_pct": "13.80"
+    },
+    {
+      "payment_method": "Credit card (automatic)",
+      "customers": 1522,
+      "churned": 232,
+      "churn_rate_pct": "15.24",
+      "mrr_lost": "17946.60",
+      "share_of_churned_pct": "12.41"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "query": "04_tenure_cohorts.sql",
+  "database": "churn_db",
+  "run_timestamp": "2026-11-12T16:02:41.963160+05:30",
+  "rows": [
+    {
+      "tenure_band": "0-12",
+      "customers": 2186,
+      "churned": 1037,
+      "churn_rate_pct": "47.44",
+      "mrr_lost": "68954.25",
+      "cumulative_churned_share_pct": "55.48"
+    },
+    {
+      "tenure_band": "13-24",
+      "customers": 1024,
+      "churned": 294,
+      "churn_rate_pct": "28.71",
+      "mrr_lost": "23081.65",
+      "cumulative_churned_share_pct": "71.21"
+    },
+    {
+      "tenure_band": "25-48",
+      "customers": 1594,
+      "churned": 325,
+      "churn_rate_pct": "20.39",
+      "mrr_lost": "27462.50",
+      "cumulative_churned_share_pct": "88.60"
+    },
+    {
+      "tenure_band": "49-72",
+      "customers": 2239,
+      "churned": 213,
+      "churn_rate_pct": "9.51",
+      "mrr_lost": "19632.45",
+      "cumulative_churned_share_pct": "100.00"
+    }
+  ]
+}

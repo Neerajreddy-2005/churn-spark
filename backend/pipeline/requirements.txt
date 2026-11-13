@@ -1,0 +1,6 @@
+pyspark==3.5.9
+delta-spark==3.3.3
+py4j==0.10.9.9
+pytest==9.1.1
+python-dotenv==1.2.4
+numpy==1.26.4  # required by pyspark.ml (MLlib imports it); no pandas/sklearn

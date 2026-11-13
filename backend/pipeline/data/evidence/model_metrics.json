@@ -1,0 +1,193 @@
+{
+  "run_id": "b7bd4cd7f6404cfa910646b3910d1792",
+  "timestamp": "2026-11-12T18:50:26.278334+05:30",
+  "seed": 42,
+  "features": {
+    "categorical": [
+      "gender",
+      "contract",
+      "internet_service",
+      "payment_method",
+      "multiple_lines",
+      "online_security",
+      "online_backup",
+      "device_protection",
+      "tech_support",
+      "streaming_tv",
+      "streaming_movies"
+    ],
+    "boolean": [
+      "senior_citizen",
+      "partner",
+      "dependents",
+      "phone_service",
+      "paperless_billing"
+    ],
+    "numeric": [
+      "tenure_months",
+      "monthly_charges"
+    ],
+    "excluded": [
+      "total_charges",
+      "tenure_band",
+      "addon_service_count"
+    ],
+    "never_features": [
+      "churn",
+      "churn_flag",
+      "customer_id",
+      "total_charges_imputed",
+      "_ingest_ts",
+      "_source_file",
+      "_batch_id"
+    ]
+  },
+  "split": {
+    "train": {
+      "rows": 5698,
+      "churned": 1498,
+      "churn_rate_pct": 26.29
+    },
+    "test": {
+      "rows": 1345,
+      "churned": 371,
+      "churn_rate_pct": 27.58
+    }
+  },
+  "model": {
+    "type": "LogisticRegression",
+    "regParam": 0.01,
+    "elasticNetParam": 0.0,
+    "maxIter": 100
+  },
+  "auc_roc_test": 0.8328,
+  "auc_pr_test": 0.6624,
+  "auc_roc_train": 0.8489,
+  "threshold": 0.5,
+  "at_threshold": {
+    "precision": 0.6779,
+    "recall": 0.4879,
+    "f1": 0.5674,
+    "accuracy": 0.7948,
+    "confusion_matrix": {
+      "tp": 181,
+      "fp": 86,
+      "tn": 888,
+      "fn": 190
+    },
+    "flagged_share_pct": 19.85
+  },
+  "capture": {
+    "top_10": {
+      "top_pct": 10,
+      "customers": 134,
+      "churners_captured": 105,
+      "capture_rate_pct": 28.3,
+      "lift": 2.83
+    },
+    "top_20": {
+      "top_pct": 20,
+      "customers": 269,
+      "churners_captured": 183,
+      "capture_rate_pct": 49.33,
+      "lift": 2.47
+    },
+    "top_30": {
+      "top_pct": 30,
+      "customers": 404,
+      "churners_captured": 238,
+      "capture_rate_pct": 64.15,
+      "lift": 2.14
+    }
+  },
+  "baseline": {
+    "rule": "contract = Month-to-month",
+    "precision": 0.4411,
+    "recall": 0.8679,
+    "f1": 0.5849,
+    "accuracy": 0.6602,
+    "confusion_matrix": {
+      "tp": 322,
+      "fp": 408,
+      "tn": 566,
+      "fn": 49
+    },
+    "flagged_share_pct": 54.28,
+    "model_capture_at_same_flagged_share": {
+      "top_pct": 54.28,
+      "customers": 730,
+      "churners_captured": 325,
+      "capture_rate_pct": 87.6,
+      "lift": 1.61
+    },
+    "rule_capture_at_budget_pct": {
+      "top_10": 15.99,
+      "top_20": 31.98,
+      "top_30": 47.97
+    },
+    "random_ranking_capture_rate": "equals the top share by definition (top 20% finds 20% of churners)"
+  },
+  "top_coefficients": [
+    {
+      "feature": "tenure_months",
+      "coefficient": -0.7242
+    },
+    {
+      "feature": "contract = Month-to-month",
+      "coefficient": 0.2766
+    },
+    {
+      "feature": "contract = Two year",
+      "coefficient": -0.2676
+    },
+    {
+      "feature": "internet_service = Fiber optic",
+      "coefficient": 0.2041
+    },
+    {
+      "feature": "paperless_billing",
+      "coefficient": 0.1752
+    },
+    {
+      "feature": "internet_service = DSL",
+      "coefficient": -0.1748
+    },
+    {
+      "feature": "payment_method = Electronic check",
+      "coefficient": 0.1196
+    },
+    {
+      "feature": "online_security = No",
+      "coefficient": 0.115
+    },
+    {
+      "feature": "tech_support = No",
+      "coefficient": 0.105
+    },
+    {
+      "feature": "monthly_charges",
+      "coefficient": 0.0878
+    },
+    {
+      "feature": "online_security = Yes",
+      "coefficient": -0.0868
+    },
+    {
+      "feature": "tech_support = Yes",
+      "coefficient": -0.0749
+    },
+    {
+      "feature": "payment_method = Credit card (automatic)",
+      "coefficient": -0.0732
+    },
+    {
+      "feature": "senior_citizen",
+      "coefficient": 0.0701
+    },
+    {
+      "feature": "multiple_lines = No",
+      "coefficient": -0.0684
+    }
+  ],
+  "model_path": "C:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\models\\churn_lr"
+}

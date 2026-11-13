@@ -1,0 +1,13 @@
+{
+  "database": "churn_db",
+  "files": [
+    "00_create_database.sql",
+    "01_schema.sql",
+    "02_warehouse.sql",
+    "03_gold.sql",
+    "04_reports.sql",
+    "05_model.sql"
+  ],
+  "timestamp": "2026-11-12T18:23:47.984834+05:30",
+  "seconds": 10.4
+}

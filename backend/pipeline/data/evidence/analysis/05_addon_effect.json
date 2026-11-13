@@ -1,0 +1,49 @@
+{
+  "query": "05_addon_effect.sql",
+  "database": "churn_db",
+  "run_timestamp": "2026-11-12T16:02:41.963160+05:30",
+  "rows": [
+    {
+      "addon_service_count": 0,
+      "customers": 693,
+      "churned": 362,
+      "churn_rate_pct": "52.24"
+    },
+    {
+      "addon_service_count": 1,
+      "customers": 966,
+      "churned": 442,
+      "churn_rate_pct": "45.76"
+    },
+    {
+      "addon_service_count": 2,
+      "customers": 1033,
+      "churned": 370,
+      "churn_rate_pct": "35.82"
+    },
+    {
+      "addon_service_count": 3,
+      "customers": 1118,
+      "churned": 306,
+      "churn_rate_pct": "27.37"
+    },
+    {
+      "addon_service_count": 4,
+      "customers": 852,
+      "churned": 190,
+      "churn_rate_pct": "22.30"
+    },
+    {
+      "addon_service_count": 5,
+      "customers": 571,
+      "churned": 71,
+      "churn_rate_pct": "12.43"
+    },
+    {
+      "addon_service_count": 6,
+      "customers": 284,
+      "churned": 15,
+      "churn_rate_pct": "5.28"
+    }
+  ]
+}

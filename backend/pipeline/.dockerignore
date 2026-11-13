@@ -1,0 +1,10 @@
+# Never send secrets, data, models or local tooling into the image build.
+.env
+.env.*
+.venv
+data
+models
+jars
+tests
+.pytest_cache
+**/__pycache__

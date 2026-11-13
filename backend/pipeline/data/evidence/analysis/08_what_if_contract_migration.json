@@ -1,0 +1,17 @@
+{
+  "query": "08_what_if_contract_migration.sql",
+  "database": "churn_db",
+  "run_timestamp": "2026-11-12T16:02:41.963160+05:30",
+  "rows": [
+    {
+      "migrate_pct": "10.00",
+      "mtm_customers": 3875,
+      "mtm_churn_rate_pct": "42.71",
+      "one_year_churn_rate_pct": "11.27",
+      "mtm_churner_avg_charge": "73.02",
+      "customers_migrated": "387.5",
+      "churned_avoided": "121.8",
+      "monthly_revenue_retained": "8896.00"
+    }
+  ]
+}

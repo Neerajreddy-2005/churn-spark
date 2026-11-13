@@ -1,0 +1,37 @@
+# Python / local tooling
+.venv/
+__pycache__/
+.pytest_cache/
+
+# Secrets: never committed (only the .env.example templates are)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+backend/pipeline/.env
+frontend/.env.local
+
+# Pipeline: generated data, models and downloaded jars stay local
+backend/pipeline/data/*
+!backend/pipeline/data/raw/
+backend/pipeline/data/raw/*
+!backend/pipeline/data/raw/.gitkeep
+# The proof files behind every claim are committed; the worker's running log (internal IDs) is not.
+!backend/pipeline/data/evidence/
+backend/pipeline/data/evidence/*.jsonl
+backend/pipeline/models/
+backend/pipeline/jars/
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Power BI file is large and binary; PDF/PNG exports live in docs/powerbi/
+*.pbix
+
+# Website build output and dependencies
+frontend/node_modules/
+frontend/dist/
+
+# Supabase CLI local link state
+backend/supabase/.temp/

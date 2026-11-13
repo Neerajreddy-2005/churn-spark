@@ -1,0 +1,15 @@
+{
+  "model_version": "b7bd4cd7f6404cfa910646b3910d1792",
+  "timestamp": "2026-11-12T18:52:30.291708+05:30",
+  "snapshot_month": "2026-10",
+  "customers_scored": 7043,
+  "band_counts": {
+    "high": 953,
+    "medium": 1665,
+    "low": 4425
+  },
+  "high_cutoff": 0.6,
+  "medium_cutoff": 0.3,
+  "in_training_set": 5698,
+  "seconds": 119.1
+}

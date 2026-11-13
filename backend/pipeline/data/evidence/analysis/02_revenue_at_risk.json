@@ -1,0 +1,14 @@
+{
+  "query": "02_revenue_at_risk.sql",
+  "database": "churn_db",
+  "run_timestamp": "2026-11-12T16:02:41.963160+05:30",
+  "rows": [
+    {
+      "total_mrr": "456116.60",
+      "churned_mrr": "139130.85",
+      "churned_share_pct": "30.50",
+      "avg_charge_churned": "74.44",
+      "avg_charge_retained": "61.27"
+    }
+  ]
+}

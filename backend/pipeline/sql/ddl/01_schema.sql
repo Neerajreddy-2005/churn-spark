@@ -1,0 +1,1 @@
+IF SCHEMA_ID('churn') IS NULL EXEC('CREATE SCHEMA churn');
