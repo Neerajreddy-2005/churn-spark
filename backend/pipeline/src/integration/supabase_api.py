@@ -25,8 +25,9 @@ def _parse(raw):
         return text
 
 
-def request(method, path, key, token=None, body=None, headers=None):
-    """One HTTP call. Returns (status, json_or_text); HTTP error statuses are returned, not raised."""
+def request(method, path, key, token=None, body=None, headers=None, raw=False):
+    """One HTTP call. Returns (status, json_or_text), or (status, bytes) with raw=True.
+    HTTP error statuses are returned, not raised."""
     hdrs = {"apikey": key, "User-Agent": "churn-spark"}
     if token:
         hdrs["Authorization"] = f"Bearer {token}"
@@ -40,7 +41,8 @@ def request(method, path, key, token=None, body=None, headers=None):
     req = urllib.request.Request(base_url() + path, data=data, method=method, headers=hdrs)
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as resp:
-            return resp.status, _parse(resp.read())
+            data = resp.read()
+            return resp.status, (data if raw else _parse(data))
     except urllib.error.HTTPError as e:
         return e.code, _parse(e.read())
     except (urllib.error.URLError, TimeoutError, OSError) as e:
@@ -90,6 +92,11 @@ def rest_select(table, token, query=""):
     return request("GET", f"/rest/v1/{table}?{query}", anon_key(), token=token)
 
 
+def rest_rpc(function, token, args):
+    """Call a database function through PostgREST (token=None calls it as anon)."""
+    return request("POST", f"/rest/v1/rpc/{function}", anon_key(), token=token, body=args)
+
+
 def rest_insert(table, token, rows):
     return request("POST", f"/rest/v1/{table}", anon_key(), token=token, body=rows,
                    headers={"Prefer": "return=minimal"})
@@ -117,6 +124,11 @@ def storage_upload(bucket, path, data, token, content_type):
 
 def storage_download(bucket, path, key):
     return request("GET", _object_path(bucket, path), key)
+
+
+def storage_download_bytes(bucket, path, key):
+    """Exact file bytes: an .xlsx is binary and a CSV may not be UTF-8, so never decode here."""
+    return request("GET", _object_path(bucket, path), key, raw=True)
 
 
 def storage_delete(bucket, path, key):

@@ -33,7 +33,7 @@ export default function Upload() {
       <section className="panel">
         <div className="panel-head">
           <h2>Your organisation's uploads</h2>
-          <span className="sub">Queued: waiting for the worker. Processing: being scored. Done: open the run. Rejected: the file was not acceptable, see the reason. Failed: system error, upload again.</span>
+          <span className="sub">Queued: waiting for the worker. Processing: being scored. Needs review: a file in another layout; confirm its columns under Datasets. Done: open the run. Rejected: the file was not acceptable, see the reason. Failed: system error, upload again.</span>
         </div>
         <Status loading={uploads.loading && !uploads.data} error={uploads.error}>
           {!uploads.data?.length ? (
@@ -50,7 +50,9 @@ export default function Upload() {
                     <td>{u.original_name}</td>
                     <td>{fmtMonth(u.snapshot_month)}</td>
                     <td><Pill tone={u.status} dot={u.status === 'processing'}>{label(u.status)}</Pill></td>
-                    <td>{u.status_reason ?? ''}</td>
+                    <td>{u.status === 'needs_review'
+                      ? <Link to={`/datasets/${u.id}`}>Confirm the columns</Link>
+                      : u.status_reason ?? ''}</td>
                     <td>{u.run_id ? <Link to={`/runs/${encodeURIComponent(u.run_id)}`}>{u.run_id}</Link> : ''}</td>
                   </tr>
                 ))}

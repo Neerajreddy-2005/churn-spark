@@ -15,6 +15,7 @@ export const IconRuns = () => <Icon><path d="M2.6 4h10.8M2.6 8h7.4M2.6 12h4.6" /
 export const IconTeam = () => <Icon><circle cx="6" cy="5.8" r="2.4" /><path d="M1.8 13.2c.6-2.3 2.2-3.5 4.2-3.5s3.6 1.2 4.2 3.5M10.9 3.6a2.2 2.2 0 0 1 0 4.4M12.4 9.9c1 .6 1.6 1.7 1.9 3.3" /></Icon>
 export const IconOrg = () => <Icon><path d="M2.6 13.4V3.6l5-1.6v11.4M7.6 5.4l5.8 1.8v6.2M1.6 13.4h12.8M4.6 6h1M4.6 8.6h1M4.6 11.2h1M10 9h1.4M10 11.4h1.4" /></Icon>
 export const IconAudit = () => <Icon><path d="M4 2.4h5.6L12.4 5v8.6H4z" /><path d="M9.4 2.4V5.2h3M6.2 8h4M6.2 10.6h4" /></Icon>
+export const IconTable = () => <Icon><rect x="2.4" y="2.6" width="11.2" height="10.8" rx="1.6" /><path d="M2.4 6.2h11.2M2.4 9.8h11.2M6.4 6.2v7.2" /></Icon>
 export const IconSearch = () => <Icon><circle cx="7" cy="7" r="4.4" /><path d="m10.4 10.4 3.2 3.2" /></Icon>
 export const IconBack = () => <Icon><path d="M9.8 3.4 5.2 8l4.6 4.6" /></Icon>
 export const IconArrow = () => <Icon><path d="M3 8h10M9 4l4 4-4 4" /></Icon>

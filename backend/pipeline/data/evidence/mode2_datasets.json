@@ -1,0 +1,345 @@
+{
+  "timestamp": "2026-11-13T20:09:38.207654+05:30",
+  "command": "python -m src.evidence.mode2_datasets <files>",
+  "note": "Public Kaggle files (not committed). Each split is stratified 80/20 with seed 42; metrics are on the 20% holdout.",
+  "results": [
+    {
+      "file": "Churn_Modelling.csv",
+      "sha256": "3996cd1fa372e0db0cd9c0ebac35bbd4e8e3c65fb942bb010c826e7b1eeef0a0",
+      "variant": "suggested columns",
+      "rows": 10000,
+      "columns": 14,
+      "sheet": null,
+      "suggested": {
+        "target": "Exited",
+        "positive": "1",
+        "id": "CustomerId",
+        "left_out": {
+          "RowNumber": "identifier",
+          "Surname": "personal"
+        },
+        "is_churn_data": true
+      },
+      "checks": {
+        "g01": "pass",
+        "g02": "pass",
+        "g03": "pass",
+        "g04": "pass",
+        "g05": "pass",
+        "g06": "pass",
+        "g07": "pass"
+      },
+      "outcome": "trained",
+      "rows_split": {
+        "total": 10000,
+        "train": 8079,
+        "test": 1921
+      },
+      "base_churn_rate_pct": 20.37,
+      "auc_roc_test": 0.7699,
+      "auc_roc_train": 0.7674,
+      "auc_pr_test": 0.4688,
+      "top20_capture_pct": 48.48,
+      "top20_max_possible_pct": 98.18,
+      "suspicious": false,
+      "leakage_removed": [],
+      "leakage_warned": [],
+      "top_drivers": [
+        "Age",
+        "IsActiveMember",
+        "Geography",
+        "Balance",
+        "Gender"
+      ],
+      "reconciliation": {
+        "passed": 16,
+        "checks": 16
+      },
+      "risk_bands": {
+        "high": 278,
+        "medium": 1835,
+        "low": 7887
+      },
+      "seconds": 104.1
+    },
+    {
+      "file": "customer_churn_dataset-testing.csv",
+      "sha256": "330af932f2dc1cae917f3bd0fb29395c4021319dd906189b7dc257d0ad58a617",
+      "variant": "suggested columns",
+      "rows": 64374,
+      "columns": 12,
+      "sheet": null,
+      "suggested": {
+        "target": "Churn",
+        "positive": "1",
+        "id": "CustomerID",
+        "left_out": {},
+        "is_churn_data": true
+      },
+      "checks": {
+        "g01": "pass",
+        "g02": "pass",
+        "g03": "pass",
+        "g04": "pass",
+        "g05": "pass",
+        "g06": "pass",
+        "g07": "pass"
+      },
+      "outcome": "trained",
+      "rows_split": {
+        "total": 64374,
+        "train": 51350,
+        "test": 13024
+      },
+      "base_churn_rate_pct": 47.37,
+      "auc_roc_test": 0.9023,
+      "auc_roc_train": 0.905,
+      "auc_pr_test": 0.8951,
+      "top20_capture_pct": 39.63,
+      "top20_max_possible_pct": 42.22,
+      "suspicious": false,
+      "leakage_removed": [],
+      "leakage_warned": [],
+      "top_drivers": [
+        "Payment Delay",
+        "Support Calls",
+        "Tenure",
+        "Usage Frequency",
+        "Gender"
+      ],
+      "reconciliation": {
+        "passed": 16,
+        "checks": 16
+      },
+      "risk_bands": {
+        "high": 26591,
+        "medium": 13214,
+        "low": 24569
+      },
+      "seconds": 63.0
+    },
+    {
+      "file": "E Commerce Dataset.xlsx",
+      "sha256": "db70f1e34bc5326887ea3fb3d2a0854e82c577d55ef3a76fdfb25328631bd44d",
+      "variant": "suggested columns",
+      "rows": 5630,
+      "columns": 20,
+      "sheet": "E Comm",
+      "suggested": {
+        "target": "Churn",
+        "positive": "1",
+        "id": "CustomerID",
+        "left_out": {},
+        "is_churn_data": true
+      },
+      "checks": {
+        "g01": "pass",
+        "g02": "pass",
+        "g03": "pass",
+        "g04": "pass",
+        "g05": "pass",
+        "g06": "pass",
+        "g07": "pass"
+      },
+      "outcome": "trained",
+      "rows_split": {
+        "total": 5630,
+        "train": 4548,
+        "test": 1082
+      },
+      "base_churn_rate_pct": 16.84,
+      "auc_roc_test": 0.9031,
+      "auc_roc_train": 0.8979,
+      "auc_pr_test": 0.7008,
+      "top20_capture_pct": 72.78,
+      "top20_max_possible_pct": 100.0,
+      "suspicious": false,
+      "leakage_removed": [],
+      "leakage_warned": [],
+      "top_drivers": [
+        "Tenure",
+        "Complain",
+        "NumberOfAddress",
+        "PreferedOrderCat",
+        "SatisfactionScore"
+      ],
+      "reconciliation": {
+        "passed": 24,
+        "checks": 24
+      },
+      "risk_bands": {
+        "high": 365,
+        "medium": 762,
+        "low": 4503
+      },
+      "seconds": 37.4
+    },
+    {
+      "file": "Telco_custom_churn.xlsx",
+      "sha256": "1bcbc0ccc9b352175216979102628e579cfbde2c3ff57b005de168a433122640",
+      "variant": "suggested columns",
+      "rows": 7043,
+      "columns": 33,
+      "sheet": "Telco_Churn",
+      "suggested": {
+        "target": "Churn Label",
+        "positive": "Yes",
+        "id": "CustomerID",
+        "left_out": {
+          "Count": "constant",
+          "Country": "constant",
+          "State": "constant",
+          "City": "categories",
+          "Zip Code": "code",
+          "Lat Long": "categories",
+          "Churn Value": "leakage",
+          "Churn Score": "leakage",
+          "Churn Reason": "leakage"
+        },
+        "is_churn_data": true
+      },
+      "checks": {
+        "g01": "pass",
+        "g02": "pass",
+        "g03": "pass",
+        "g04": "pass",
+        "g05": "pass",
+        "g06": "pass",
+        "g07": "pass"
+      },
+      "outcome": "trained",
+      "rows_split": {
+        "total": 7043,
+        "train": 5698,
+        "test": 1345
+      },
+      "base_churn_rate_pct": 26.54,
+      "auc_roc_test": 0.8676,
+      "auc_roc_train": 0.8559,
+      "auc_pr_test": 0.7033,
+      "top20_capture_pct": 57.01,
+      "top20_max_possible_pct": 75.37,
+      "suspicious": false,
+      "leakage_removed": [],
+      "leakage_warned": [],
+      "top_drivers": [
+        "Tenure Months",
+        "Dependents",
+        "Contract",
+        "Internet Service",
+        "Monthly Charges"
+      ],
+      "reconciliation": {
+        "passed": 28,
+        "checks": 28
+      },
+      "risk_bands": {
+        "high": 1108,
+        "medium": 1559,
+        "low": 4376
+      },
+      "seconds": 78.4
+    },
+    {
+      "file": "Telco_custom_churn.xlsx",
+      "sha256": "1bcbc0ccc9b352175216979102628e579cfbde2c3ff57b005de168a433122640",
+      "variant": "leakage columns put back",
+      "rows": 7043,
+      "columns": 33,
+      "sheet": "Telco_Churn",
+      "suggested": {
+        "target": "Churn Label",
+        "positive": "Yes",
+        "id": "CustomerID",
+        "left_out": {
+          "Count": "constant",
+          "Country": "constant",
+          "State": "constant",
+          "City": "categories",
+          "Zip Code": "code",
+          "Lat Long": "categories",
+          "Churn Value": "leakage",
+          "Churn Score": "leakage",
+          "Churn Reason": "leakage"
+        },
+        "is_churn_data": true
+      },
+      "checks": {
+        "g01": "pass",
+        "g02": "pass",
+        "g03": "pass",
+        "g04": "pass",
+        "g05": "pass",
+        "g06": "pass",
+        "g07": "pass"
+      },
+      "outcome": "trained",
+      "rows_split": {
+        "total": 7043,
+        "train": 5698,
+        "test": 1345
+      },
+      "base_churn_rate_pct": 26.54,
+      "auc_roc_test": 0.9744,
+      "auc_roc_train": 0.9744,
+      "auc_pr_test": 0.9332,
+      "top20_capture_pct": 73.78,
+      "top20_max_possible_pct": 75.37,
+      "suspicious": false,
+      "leakage_removed": [
+        [
+          "Churn Value",
+          1.0
+        ],
+        [
+          "Churn Reason",
+          1.0
+        ]
+      ],
+      "leakage_warned": [
+        [
+          "Churn Score",
+          0.9477
+        ]
+      ],
+      "top_drivers": [
+        "Churn Score",
+        "Tenure Months",
+        "Contract",
+        "Dependents",
+        "Internet Service"
+      ],
+      "reconciliation": {
+        "passed": 29,
+        "checks": 29
+      },
+      "risk_bands": {
+        "high": 1610,
+        "medium": 667,
+        "low": 4766
+      },
+      "seconds": 55.5
+    },
+    {
+      "file": "sales.csv",
+      "sha256": "d07dbe9c9f841f19d6d0e37bac73cebfbe408643fc30ff0763c58ae90773c6e3",
+      "variant": "suggested columns",
+      "rows": 100,
+      "columns": 14,
+      "sheet": null,
+      "suggested": {
+        "target": null,
+        "positive": null,
+        "id": "Order ID",
+        "left_out": {
+          "Country": "categories",
+          "Order Date": "date",
+          "Ship Date": "date"
+        },
+        "is_churn_data": false
+      },
+      "outcome": "exploration only (no churn column)",
+      "seconds": 4.4
+    }
+  ]
+}

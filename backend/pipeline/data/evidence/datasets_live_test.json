@@ -1,0 +1,173 @@
+{
+  "timestamp": "2026-11-13T19:33:04.702453+05:30",
+  "worker_run_seconds": {
+    "csv_auto_train": 46.7,
+    "csv_retrain": 13.9,
+    "xlsx_auto_train": 16.8,
+    "sales_profile": 3.8,
+    "sales_explore_only": 1.3,
+    "broken_xlsx": 1.5
+  },
+  "assertions": 39,
+  "passed": 39,
+  "failed": 0,
+  "results": [
+    {
+      "name": "csv: clear churn file trains straight away (status done)",
+      "passed": true
+    },
+    {
+      "name": "csv: suggested target Churn = Yes, ID CustomerID",
+      "passed": true
+    },
+    {
+      "name": "csv: review marked automatic and equal to the suggestions",
+      "passed": true
+    },
+    {
+      "name": "csv: ID values are not stored in the profile",
+      "passed": true
+    },
+    {
+      "name": "csv: all 7 data checks pass",
+      "passed": true
+    },
+    {
+      "name": "csv: leak 'Account Status' removed by the AUC guard",
+      "passed": true
+    },
+    {
+      "name": "csv: honest holdout AUC (0.6 to 0.99), not suspicious",
+      "passed": true
+    },
+    {
+      "name": "csv: reconciliation all pass",
+      "passed": true
+    },
+    {
+      "name": "csv: 600 scores, one per customer",
+      "passed": true
+    },
+    {
+      "name": "csv: riskiest customer has a reason, never the leak column",
+      "passed": true
+    },
+    {
+      "name": "csv: pipeline run recorded (7 checks pass, recon 0 fail)",
+      "passed": true
+    },
+    {
+      "name": "other org: cannot read the dataset",
+      "passed": true
+    },
+    {
+      "name": "other org: cannot read the scores",
+      "passed": true
+    },
+    {
+      "name": "anon: cannot call submit_dataset_review",
+      "passed": true
+    },
+    {
+      "name": "other org: review rejected as not found",
+      "passed": true
+    },
+    {
+      "name": "review rejected: unknown column",
+      "passed": true
+    },
+    {
+      "name": "review rejected: churn value not in the column",
+      "passed": true
+    },
+    {
+      "name": "review rejected: missing features",
+      "passed": true
+    },
+    {
+      "name": "review rejected: target not a string",
+      "passed": true
+    },
+    {
+      "name": "still done after rejected reviews",
+      "passed": true
+    },
+    {
+      "name": "member: cannot update datasets directly",
+      "passed": true
+    },
+    {
+      "name": "member: cannot insert dataset_scores",
+      "passed": true
+    },
+    {
+      "name": "member: cannot change upload status directly",
+      "passed": true
+    },
+    {
+      "name": "action: logged on a scored dataset customer",
+      "passed": true
+    },
+    {
+      "name": "action rejected: unknown customer",
+      "passed": true
+    },
+    {
+      "name": "action rejected: wrong month",
+      "passed": true
+    },
+    {
+      "name": "action rejected: someone else as creator",
+      "passed": true
+    },
+    {
+      "name": "action rejected: other org on this dataset",
+      "passed": true
+    },
+    {
+      "name": "action: visible to its org with dataset_id",
+      "passed": true
+    },
+    {
+      "name": "action: not visible to the other org",
+      "passed": true
+    },
+    {
+      "name": "change columns: accepted after training, upload queued",
+      "passed": true
+    },
+    {
+      "name": "change columns: refused while queued",
+      "passed": true
+    },
+    {
+      "name": "change columns: retrained, review manual, Spend no longer used",
+      "passed": true
+    },
+    {
+      "name": "change columns: still exactly 600 scores",
+      "passed": true
+    },
+    {
+      "name": "change columns: earlier action kept",
+      "passed": true
+    },
+    {
+      "name": "xlsx: 'Data' sheet (300 rows) trained automatically",
+      "passed": true
+    },
+    {
+      "name": "sales: no churn column -> waits for review (not trained)",
+      "passed": true
+    },
+    {
+      "name": "sales: explore-only finishes as done without a model",
+      "passed": true
+    },
+    {
+      "name": "broken xlsx: rejected with a readable reason",
+      "passed": true
+    }
+  ],
+  "cleanup_problems": 0
+}

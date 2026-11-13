@@ -44,6 +44,7 @@ MAX_BYTES = 5 * 1024 * 1024
 STUCK_MINUTES = 60
 REASON_LIMIT = 500
 UPLOADS_DIR = PROJECT_ROOT / "data" / "uploads"
+UPLOAD_SUFFIXES = (".csv", ".xlsx")
 RUNS_DIR = PROJECT_ROOT / "data" / "runs"
 WORKER_EVIDENCE = EVIDENCE_DIR / "worker_runs.jsonl"
 SEGMENT_TYPES = ["overall", *GOLD_SEGMENTS.values()]
@@ -62,6 +63,8 @@ def validate_upload(org_id, file_path, size_bytes):
         raise Rejected("file path is not allowed")
     if not 0 < int(size_bytes) <= MAX_BYTES:
         raise Rejected("file is larger than 5 MB")
+    if Path(file_path).suffix.lower() not in UPLOAD_SUFFIXES:
+        raise Rejected("only .csv and .xlsx files are accepted")
 
 
 def format_reason(text):
@@ -242,13 +245,12 @@ def record_run(conn, run, org_id, upload):
 # ---- pipeline ----
 
 def download(upload, dest_dir):
-    status, body = api.storage_download(BUCKET, upload["file_path"], service_key())
-    if status != 200 or not isinstance(body, str):
+    status, data = api.storage_download_bytes(BUCKET, upload["file_path"], service_key())
+    if status != 200 or not isinstance(data, bytes):
         raise RuntimeError(f"could not download the uploaded file (HTTP {status})")
-    data = body.encode("utf-8")
     if len(data) > MAX_BYTES:
         raise Rejected("file is larger than 5 MB")
-    dest = Path(dest_dir) / "input.csv"
+    dest = Path(dest_dir) / ("input" + Path(upload["file_path"]).suffix.lower())
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_bytes(data)
     return dest
@@ -345,8 +347,16 @@ def process_upload(spark, upload):
         if not (Path(MODEL_DIR) / META_FILE).is_file():
             raise RuntimeError("the saved churn model is missing (models/churn_lr); train it first")
         with _timed(run["stage_seconds"], "download"):
-            csv_path = download(upload, upload_dir)
-        run_pipeline(spark, upload, csv_path, run, run_dir)
+            path = download(upload, upload_dir)
+        from src.integration import dataset_worker  # mode 2; imported here to avoid a circular import
+        with _db(spark) as conn:
+            dataset = dataset_worker.load_dataset(conn, upload["id"])
+        if dataset and dataset["kind"] == "generic":
+            dataset_worker.train_phase(spark, upload, path, run, run_dir, dataset)
+        elif dataset_worker.route(path) == "telco":
+            run_pipeline(spark, upload, path, run, run_dir)
+        else:
+            dataset_worker.profile_phase(spark, upload, path, run, run_dir)
     except Rejected as e:
         run["status"], reason = "rejected", str(e)
     except Exception as e:

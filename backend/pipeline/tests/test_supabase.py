@@ -57,7 +57,7 @@ def test_real_migration_files_are_numbered():
     assert names == ["0001_schema.sql", "0002_security.sql", "0003_storage.sql", "0004_hardening.sql",
                      "0005_admin.sql", "0006_force_password_change.sql",
                      "0007_admin_function_grants.sql", "0008_admin_separation.sql",
-                     "0009_profile_backfill_and_audit_labels.sql"]
+                     "0009_profile_backfill_and_audit_labels.sql", "0010_datasets.sql", "0011_dataset_actions.sql"]
 
 
 def test_redact_masks_secrets(monkeypatch):
@@ -152,7 +152,7 @@ def cleanup(spark, org_ids, user_ids, storage_paths):
         step(api.storage_delete, "uploads", path, cfg.service_key())
     conn = connect(spark) if org_ids else None
     try:
-        for table in ("retention_actions", "customer_scores", "segment_aggregates", "dq_results",
+        for table in ("retention_actions", "dataset_scores", "datasets", "customer_scores", "segment_aggregates", "dq_results",
                       "reconciliation_results", "pipeline_runs", "uploads"):
             for org_id in org_ids:
                 step(execute, conn, f"delete from public.{table} where org_id = ?::uuid", (org_id,))

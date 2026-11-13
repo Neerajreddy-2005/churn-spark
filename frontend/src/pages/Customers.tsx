@@ -2,10 +2,12 @@ import { useState, type KeyboardEvent, type MouseEvent } from 'react'
 import { supabase } from '../supabase'
 import { must, useLoad } from '../useLoad'
 import { PageHead, Status, Table } from '../components'
+import { useSelectedSource, useSources, sourceOptions } from '../dataSources'
+import { DatasetCustomers } from '../datasetViews'
 import { Select } from '../Select'
 import { Pill } from '../ui'
 import { useGo } from '../nav'
-import { fmtMoney, fmtMonth, fmtNum, fmtRisk, label, fmtReason } from '../format'
+import { fmtMoney, fmtNum, fmtRisk, label, fmtReason } from '../format'
 import { RISK_BANDS, type CustomerScore, type SegmentAggregate } from '../types'
 
 const PAGE = 50
@@ -18,7 +20,8 @@ interface Page {
 
 export default function Customers() {
   const go = useGo()
-  const [month, setMonth] = useState<string | null>(null)
+  const sources = useSources()
+  const [src, select] = useSelectedSource(sources.data)
   const [band, setBand] = useState('high')
   const [contract, setContract] = useState('')
   const [internet, setInternet] = useState('')
@@ -36,8 +39,7 @@ export default function Customers() {
       ) as Pick<SegmentAggregate, 'snapshot_month' | 'segment_type' | 'segment'>[],
     [],
   )
-  const months = [...new Set(meta.data?.map((r) => r.snapshot_month) ?? [])]
-  const selected = month ?? months[0] ?? null
+  const selected = src?.kind === 'telco' ? src.month : null
   const opts = (type: string) =>
     [...new Set(meta.data?.filter((r) => r.snapshot_month === selected && r.segment_type === type).map((r) => r.segment) ?? [])].sort()
 
@@ -83,17 +85,19 @@ export default function Customers() {
 
   return (
     <div className="page rise">
-      <PageHead title="At-risk customers" meta="Customers ranked by churn risk for the month you pick." />
-      <Status loading={meta.loading} error={meta.error}>
-        {!selected ? (
+      <PageHead title="At-risk customers" meta="Customers ranked by churn risk for the data you pick."
+        actions={sources.data && sources.data.length > 0 && src && (
+          <Select label="Data" hideLabel value={src.value} onChange={(v) => { select(v); setPage(0) }}
+            options={sourceOptions(sources.data)} />
+        )} />
+      <Status loading={meta.loading || sources.loading} error={meta.error ?? sources.error}>
+        {src?.kind === 'dataset' ? <DatasetCustomers key={src.id} id={src.id} /> : !selected ? (
           <section className="panel">
             <p className="empty-line">No scored customers yet. Upload a CSV and its customers appear here.</p>
           </section>
         ) : (
           <>
             <div className="filters">
-              <Select label="Month" value={selected} onChange={(v) => { setMonth(v); setPage(0) }}
-                options={months.map((m) => ({ value: m, label: fmtMonth(m) }))} />
               <Select label="Risk band" value={band} onChange={(v) => { setBand(v); setPage(0) }}
                 options={[ALL, ...RISK_BANDS.map((b) => ({ value: b, label: label(b) }))]} />
               <Select label="Contract" value={contract} onChange={(v) => { setContract(v); setPage(0) }}

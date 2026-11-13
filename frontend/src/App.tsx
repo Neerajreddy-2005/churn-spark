@@ -9,7 +9,7 @@ import { Skeleton } from './ui'
 import { Handoff } from './Handoff'
 import { startSignout } from './Signout'
 import {
-  IconAudit, IconOrg, IconOverview, IconRisk, IconRuns, IconSearch, IconTeam, IconUpload, Mark,
+  IconAudit, IconOrg, IconOverview, IconRisk, IconRuns, IconTable, IconSearch, IconTeam, IconUpload, Mark,
 } from './icons'
 
 // Routes load on demand, so the sign-in page does not download every screen.
@@ -17,6 +17,8 @@ const Login = lazy(() => import('./pages/Login'))
 const Overview = lazy(() => import('./pages/Overview'))
 const Upload = lazy(() => import('./pages/Upload'))
 const Runs = lazy(() => import('./pages/Runs'))
+const Datasets = lazy(() => import('./pages/Datasets'))
+const DatasetDetail = lazy(() => import('./pages/DatasetDetail'))
 const RunDetail = lazy(() => import('./pages/RunDetail'))
 const Customers = lazy(() => import('./pages/Customers'))
 const CustomerDetail = lazy(() => import('./pages/CustomerDetail'))
@@ -97,6 +99,7 @@ function Shell() {
           { label: 'Overview', to: '/', icon: <IconOverview /> },
           { label: 'At-risk customers', to: '/customers', icon: <IconRisk /> },
           { label: 'Upload data', to: '/upload', icon: <IconUpload /> },
+          { label: 'Datasets', to: '/datasets', icon: <IconTable /> },
           { label: 'Pipeline runs', to: '/runs', icon: <IconRuns /> },
           ...(isManager ? [{ label: 'Team', to: '/admin/team', icon: <IconTeam /> }] : []),
         ]
@@ -156,6 +159,8 @@ export default function App() {
           <Route path="/" element={<Overview />} />
           <Route path="/upload" element={<Upload />} />
           <Route path="/runs" element={<Runs />} />
+          <Route path="/datasets" element={<Datasets />} />
+          <Route path="/datasets/:uploadId" element={<DatasetDetail />} />
           <Route path="/runs/:runId" element={<RunDetail />} />
           <Route path="/customers" element={<Customers />} />
           <Route path="/customers/:customerId" element={<CustomerDetail />} />

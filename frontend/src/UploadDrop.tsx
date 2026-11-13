@@ -7,6 +7,7 @@ import { IconFile, IconUpload } from './icons'
 const MAX_BYTES = 5 * 1024 * 1024
 const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/
 const DENIED = 'Upload limit reached (20 per day) or not allowed'
+const XLSX_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 // Mirrors backend/pipeline/config/dq_rules.json (allowed values and ranges).
 const ACCEPTED: [string, string][] = [
@@ -25,14 +26,9 @@ const ACCEPTED: [string, string][] = [
   ['Churn (optional)', 'Yes · No. Leave the column out to score customers whose outcome is not known yet'],
 ]
 
-function currentMonth() {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-}
-
 function check(file: File | null): string | null {
   if (!file) return 'Choose a CSV file.'
-  if (!file.name.toLowerCase().endsWith('.csv')) return 'The file must be a .csv.'
+  if (!/\.(csv|xlsx)$/i.test(file.name)) return 'The file must be a .csv or .xlsx.'
   if (file.size === 0) return 'The file is empty.'
   if (file.size > MAX_BYTES) return 'The file is larger than 5 MB.'
   return null
@@ -52,7 +48,12 @@ function AcceptedFiles() {
       </button>
       <div id={id} className="accepted-pop" hidden={!open}>
         <p className="muted">
-          The IBM Telco customer layout (Kaggle “Telco Customer Churn”). One row per customer · comma-separated .csv up to 5 MB ·
+          <strong>Any other customer churn file</strong> (CSV or Excel, one row per customer) is accepted too. When a column
+          clearly says whether the customer left (a name like Churn, Exited or Attrition), a model is trained on that file
+          straight away; otherwise you confirm the columns under Datasets. Its results appear in the Data picker on Overview and At-risk.
+        </p>
+        <p className="muted">
+          <strong>Certified Telco layout</strong>, shown on the Overview and At-risk pages: the IBM Telco customer layout (Kaggle “Telco Customer Churn”). One row per customer · comma-separated .csv up to 5 MB ·
           column names exactly as below (case-sensitive), in any order, with no extra columns.
         </p>
         <dl className="accepted-grid">
@@ -70,7 +71,7 @@ function AcceptedFiles() {
 
 export function UploadDrop({ onUploaded }: { onUploaded?: () => void }) {
   const { session, profile } = useAuth()
-  const [month, setMonth] = useState(currentMonth())
+  const [month, setMonth] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [over, setOver] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -93,14 +94,15 @@ export function UploadDrop({ onUploaded }: { onUploaded?: () => void }) {
     e.preventDefault()
     setError(null)
     setInfo(null)
-    if (!MONTH_RE.test(month)) return setError('The month must look like YYYY-MM, for example 2026-11.')
+    if (!MONTH_RE.test(month)) return setError('Enter the month as YYYY-MM, for example 2026-01.')
     const bad = check(file)
     if (bad) return setError(bad)
     if (!session || !profile || !file) return setError('Your account has no organisation profile.')
 
     setBusy(true)
-    const path = `${profile.org_id}/${crypto.randomUUID()}.csv`
-    const up = await supabase.storage.from('uploads').upload(path, file, { contentType: 'text/csv' })
+    const xlsx = /\.xlsx$/i.test(file.name)
+    const path = `${profile.org_id}/${crypto.randomUUID()}${xlsx ? '.xlsx' : '.csv'}`
+    const up = await supabase.storage.from('uploads').upload(path, file, { contentType: xlsx ? XLSX_TYPE : 'text/csv' })
     if (up.error) {
       setBusy(false)
       return setError(`${DENIED} (${up.error.message})`)
@@ -125,9 +127,12 @@ export function UploadDrop({ onUploaded }: { onUploaded?: () => void }) {
     <form className="stack upload-form" onSubmit={onSubmit} style={{ maxWidth: 'none' }}>
       <label>
         Month this data is for
-        <input value={month} onChange={(e) => setMonth(e.target.value)} placeholder="2026-11" inputMode="numeric"
+        <input value={month} onChange={(e) => setMonth(e.target.value)} placeholder="2026-01" inputMode="numeric"
           pattern="\d{4}-(0[1-9]|1[0-2])" required aria-describedby="month-hint" style={{ maxWidth: 200 }} />
-        <span className="hint" id="month-hint">Year and month, like 2026-11</span>
+        <span className="hint" id="month-hint">
+          For Telco files this is the month the customers belong to: uploading the same
+          month again replaces it. For other datasets it is only a label.
+        </span>
       </label>
       <label
         className={`dropzone${over ? ' over' : ''}`}
@@ -135,11 +140,11 @@ export function UploadDrop({ onUploaded }: { onUploaded?: () => void }) {
         onDragLeave={() => setOver(false)}
         onDrop={onDrop}>
         {file ? <IconFile /> : <IconUpload />}
-        <strong>{file ? file.name : 'Drop your customer CSV here'}</strong>
+        <strong>{file ? file.name : 'Drop your customer file here (CSV or Excel)'}</strong>
         <span className="muted" id="file-hint">
-          {file ? `${(file.size / 1024).toFixed(0)} KB · click to choose a different file` : 'or click to choose a file · .csv, up to 5 MB'}
+          {file ? `${(file.size / 1024).toFixed(0)} KB · click to choose a different file` : 'or click to choose a file · .csv or .xlsx, up to 5 MB'}
         </span>
-        <input ref={input} type="file" accept=".csv,text/csv" className="sr-only" aria-describedby="file-hint"
+        <input ref={input} type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" className="sr-only" aria-describedby="file-hint"
           onChange={(e) => pick(e.target.files?.[0] ?? null)} />
       </label>
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>

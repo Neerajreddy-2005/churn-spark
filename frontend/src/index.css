@@ -182,6 +182,7 @@ th[scope='row'] { color: var(--muted); font-weight: 500; font-size: 13px; paddin
 .pill.high, .pill.fail, .pill.failed, .pill.rejected, .pill.churned { color: var(--risk-ink); background: var(--risk-tint); }
 .pill.medium, .pill.warn, .pill.queued, .pill.processing, .pill.pending { color: var(--warn-ink); background: var(--warn-tint); }
 .pill.low, .pill.neutral, .pill.no_response, .pill.inactive { color: var(--muted); background: var(--neutral-tint); }
+.pill.needs_review { color: var(--accent); background: var(--accent-tint); }
 .pill.pass, .pill.done, .pill.retained, .pill.active { color: var(--ok-ink); background: var(--ok-tint); }
 .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .pill.processing .dot { animation: pulse 1.2s ease-in-out infinite; }
@@ -346,7 +347,12 @@ form.inline input { width: 12rem; }
 .upload-form { position: relative; }
 /* the panel anchors to the whole upload form, so it spreads wide rather than tall */
 .accepted { width: fit-content; font-size: 13px; }
-.accepted .linkish { background: none; border: 0; padding: 4px 0; min-height: 24px; color: var(--accent); font: inherit; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+/* A button that reads as a link. button.* outweighs the base button / button:hover rules. */
+button.linkish, button.linkish:hover { display: inline; height: auto; min-height: 24px; padding: 4px 0; background: none; border: 0;
+  border-radius: 0; color: var(--accent); font: inherit; white-space: normal; cursor: pointer;
+  text-decoration: underline dotted; text-underline-offset: 3px; }
+button.linkish:hover { text-decoration-style: solid; }
+button.linkish:active:not(:disabled) { transform: none; }
 /* padding-top (not margin) bridges the gap so the pointer can travel into the panel without closing it */
 .accepted-pop { position: absolute; left: 0; right: 0; top: 100%; z-index: 30; padding-top: 6px; }
 .accepted-pop[hidden] { display: none; }
@@ -595,3 +601,42 @@ html[data-handoff='closing'] .sheet-inner { opacity: 0; transition: opacity 300m
 html[data-handoff='landing'] .auth-scene { opacity: 0; transition: none; }
 html[data-handoff='landing'] .auth > .auth-sheet, html[data-handoff='arrive'] .auth > .auth-sheet { opacity: 0; }
 html[data-handoff='landing'] .auth-sheet *, html[data-handoff='arrive'] .auth-sheet * { animation-play-state: paused !important; }
+
+/* ---- Mode 2: datasets (review, exploration, model card, insights) ---- */
+.muted.small, p.small { font-size: 12.5px; }
+.note-box { margin: 0; padding: 10px 12px; border-radius: var(--r-control); background: var(--accent-tint); font-size: 13px; line-height: 1.5; }
+.note-box.warn { background: var(--warn-tint); color: var(--warn-ink); }
+.review-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.feature-pick { border: 0; padding: 0; margin: 0; min-width: 0; }
+.feature-pick legend { font-weight: 600; margin-bottom: 8px; }
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+.feature-grid label { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-control); font-size: 13px; cursor: pointer; min-width: 0; }
+.feature-grid label:has(input:checked) { border-color: var(--accent); background: var(--accent-tint); }
+.feature-grid label input { margin-top: 2px; flex: none; }
+.feature-grid label span { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.feature-grid label em { font-style: normal; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.panel > .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.drivers h3, .insight h3 { font-size: 14px; margin: 0 0 8px; }
+.drivers ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px 16px; }
+.drivers li { display: flex; gap: 8px; align-items: baseline; font-size: 13px; min-width: 0; }
+.drivers li strong { overflow-wrap: anywhere; }
+.drivers .up { color: var(--risk-ink); } .drivers .down { color: var(--ok-ink); }
+.insight-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 22px 28px; }
+.insight h3 .muted { font-weight: 400; font-size: 12px; }
+.insight .bar .name { max-width: 14ch; overflow: hidden; text-overflow: ellipsis; }
+.explore-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+.col-card { border: 1px solid var(--line); border-radius: var(--r-control); padding: 10px 12px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.col-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; min-width: 0; }
+.col-head strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.col-meta, .col-range { font-size: 12px; }
+.col-range { display: flex; justify-content: space-between; gap: 6px; }
+.spark { display: flex; align-items: flex-end; gap: 2px; height: 42px; }
+.spark span { flex: 1; min-height: 2px; background: var(--accent); border-radius: 2px 2px 0 0; opacity: 0.85; }
+.top-values { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 12px; }
+.top-values li { display: grid; grid-template-columns: minmax(0, 1fr) 60px auto; gap: 6px; align-items: center; }
+.top-values .v { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.top-values .t { height: 6px; border-radius: 3px; background: var(--accent-tint); overflow: hidden; }
+.top-values .t span { display: block; height: 100%; background: var(--accent); }
+.top-values .n { color: var(--muted); text-align: right; }
+.col-note { margin: 0; font-size: 11.5px; color: var(--warn-ink); }
+.bar.few { opacity: 0.45; }

@@ -1,8 +1,8 @@
 # Churn-Spark
 
-A retention workbench prototype built on the IBM Telco Customer Churn dataset. A telecom customer-retention team uploads a monthly customer CSV. A PySpark medallion pipeline (Bronze, Silver, Gold in Delta Lake) validates and processes it, and a churn model scores each customer with reasons. A public React + TypeScript app shows the data quality report, an at-risk list, retention action logging, monthly trends and pipeline run history. A SQL Server star schema and Power BI report cover analytics, and a reconciliation step proves the numbers match the source file exactly. This is a portfolio prototype, not a product.
+A retention workbench prototype built on the IBM Telco Customer Churn dataset. A telecom customer-retention team uploads a monthly customer CSV. A PySpark medallion pipeline (Bronze, Silver, Gold in Delta Lake) validates and processes it, and a churn model scores each customer with reasons. A public React + TypeScript app shows the data quality report, an at-risk list, retention action logging, monthly trends and pipeline run history. A SQL Server star schema and Power BI report cover analytics, and a reconciliation step proves the numbers match the source file exactly. Customer churn files in other layouts (bank, SaaS, e-commerce) are accepted too: the system explores the file, checks it, and trains a model on that file's own columns. This is a portfolio prototype, not a product.
 
-Status: Phases 1-4 done (ingestion, data quality, Silver/Gold, reconciliation). Phase 5a done (star-schema warehouse, SQL Server load, rc09/rc10/rc13/rc14). Next: Phase 5b (analysis SQL, Power BI, insights).
+Status: pipeline, warehouse, Power BI, churn model, Supabase back end, the live website and "bring your own churn dataset" are done and tested. Next: a scheduled Databricks Job (Phase 9) and CI on GitHub Actions (Phase 10).
 
 Design details are in [docs/SPEC.md](docs/SPEC.md). Column and table definitions are in [docs/DATA_SCHEMA.md](docs/DATA_SCHEMA.md). The website's design system is in [docs/design/DESIGN.md](docs/design/DESIGN.md).
 
@@ -47,17 +47,43 @@ Each company (organisation) sees only its own data, enforced in the database by 
 - The churn model scores AUC 0.8328 on customers it never saw in training.
 - With a fixed calling budget of 20% of customers, ranking by model risk reaches 49.33% of the customers who churned. The simple rule "call month-to-month customers" reaches 31.98% with the same budget. Source: `model_metrics.json`.
 
-### What data it accepts today
+### What data it accepts
 
-One layout: the IBM Telco customer export (Kaggle "Telco Customer Churn"), with the same 20 column names, a comma-separated `.csv` of up to 5 MB. The Upload page lists every column and its allowed values.
+`.csv` or `.xlsx`, up to 5 MB, one row per customer. Every upload goes one of two ways, decided by its columns:
 
+**1. Certified Telco layout** (Kaggle "Telco Customer Churn", the same 20 column names). It runs through the full pipeline: 20 data-quality rules, 26 reconciliation checks and the trained Telco model, with results tracked month by month. The Upload page lists every column and its allowed values.
 - **With a `Churn` column (Yes/No)**, for past months whose outcome is known, you also see actual churn and revenue lost.
 - **Without a `Churn` column**, for this month's customers whose outcome is not known yet, every customer is still scored, and the overview shows churn as "not known yet" instead of 0.
-- **Any other file** (a different layout, semicolon-separated, wrong values) is rejected with the reason, and nothing reaches the dashboard.
+- A file that is nearly this layout but broken (a missing column, wrong values, semicolons) is rejected with the reason instead of being guessed at.
+
+**2. Any other customer churn file** (bank, SaaS, e-commerce, the 33-column IBM version). Mode 2:
+- **Automatic data exploration:** for every column, its type, missing values, distribution and top values. ID and personal columns (like `Surname`) have their values hidden.
+- **Suggestions:** the churn column (found by its name, such as Churn, Exited or Attrition, with two values), the customer ID, and columns to leave out, each with a reason: identifiers, personal data, constants, codes like ZIP, dates, and columns that give the answer away.
+- **7 general data checks** (`g01`-`g07`).
+- **A Spark MLlib model trained on that file alone** (80/20 stratified split, metrics on the holdout), with a leakage guard: a column that predicts the outcome almost perfectly on its own (AUC 0.99 or higher) is removed, and one at 0.90 or higher is flagged.
+- **Training:** when the churn column is clear and the checks pass, the model trains straight away; otherwise the file waits for someone to confirm the columns. "Change columns" retrains with different choices.
+- **Results:** the same Overview and At-risk pages as the Telco data, through one **Data** picker, including customer pages and retention actions.
+
+A file with no churn column (sales data, for example) gets the exploration only.
+
+### Bring your own churn dataset: measured on public Kaggle files
+
+Each file was run through the real code (`python -m src.evidence.mode2_datasets <files>`). Metrics are on the 20% holdout. Source: `backend/pipeline/data/evidence/mode2_datasets.json`; the files themselves are not committed.
+
+| File | Rows | Churn column found | Left out automatically | Churn rate | Holdout AUC (train) | Riskiest 20% reach | Reconciliation |
+|---|---|---|---|---|---|---|---|
+| Bank (`Churn_Modelling.csv`) | 10,000 | `Exited` = 1 | RowNumber (identifier), Surname (personal) | 20.37% | 0.770 (0.767) | 48.48% of churners | 16/16 |
+| SaaS (`customer_churn_dataset-testing.csv`) | 64,374 | `Churn` = 1 | none | 47.37% | 0.902 (0.905) | 39.63% (best possible 42.22%) | 16/16 |
+| E-commerce (`E Commerce Dataset.xlsx`, 2 sheets) | 5,630 | `Churn` = 1 | none; blanks in 7 columns filled and flagged | 16.84% | 0.903 (0.898) | 72.78% | 24/24 |
+| IBM 33-column (`Telco_custom_churn.xlsx`) | 7,043 | `Churn Label` = Yes | 3 constants, City, Lat Long, Zip Code, and the leakage columns Churn Value, Churn Score, Churn Reason | 26.54% | 0.868 (0.856) | 57.01% | 28/28 |
+| Sales (`sales.csv`) | 100 | none, so exploration only | n/a | n/a | n/a | n/a | n/a |
+
+**Leakage test:** the IBM file was run again with its three outcome columns put back, as if a user ticked them. The guard removed `Churn Value` and `Churn Reason` (single-column AUC 1.000) and flagged `Churn Score` (0.948). With that column still in, the AUC rose from 0.868 to 0.974, which is why the name rule leaves it out by default and the results page warns about it.
 
 ### Limits, stated plainly
 
-- It accepts **one data layout** today. A "bring your own churn dataset" mode (automatic data exploration, choosing the ID and churn columns, a model trained on that company's own data) is the next planned feature.
+- **Mode 2 is general but not magic.** It needs one row per customer and a churn column to learn from; anything else gets the exploration only. Its model is retrained per file and is only as good as that file: a small or one-off export gives a rough model, and the holdout AUC is shown so nobody over-trusts it.
+- **The certified Telco layout** has the full 20-rule / 26-check pipeline, month-by-month tracking, revenue figures and the SQL Server / Power BI path. Other datasets have the general checks and their own model, but no warehouse or Power BI yet.
 - The model is trained on **one public snapshot**. It shows patterns in that data and has not been validated on a real company's history over time.
 - The pipeline runs as a **batch job on a laptop** (or Docker). Uploads wait in a queue until the worker processes them, which takes about 1.5 to 2.5 minutes per file.
 - It is a **portfolio prototype** that shows data engineering, analytics, BI and ML skills end to end. It is not a commercial product.
@@ -130,9 +156,10 @@ Churn-Spark/
         warehouse/          star.py (Delta star schema)
         model/              feature pipeline, training, scoring, reasons
         analysis/           runs sql/analysis and writes docs/INSIGHTS.md
-        evidence/           fault injection proof
+        evidence/           fault injection proof, Mode 2 real-dataset evidence
         output/             SQL Server setup and writer
-        integration/        Supabase worker, admin CLI, migration runner
+        generic/            Mode 2: reader (CSV/XLSX), profile, suggestions, general checks, training
+        integration/        Supabase worker (dataset_worker.py for Mode 2), admin CLI, migration runner
       tests/                pytest, local SparkSession fixture
       config/               dq_rules.json (DQ rules and thresholds), no secrets
       sql/ddl/  sql/analysis/   SQL Server tables and T-SQL analysis queries
@@ -143,11 +170,11 @@ Churn-Spark/
       data/ (other), models/, jars/   generated locally, git-ignored
     supabase/               migrations/ and functions/admin-users (Edge Function)
   frontend/                 React + TypeScript (Vite) website, netlify.toml
-  bi/powerbi/               Churn-Spark.pbix (git-ignored; exports are in docs/powerbi/)
+  bi/powerbi/               Churn-Spark.pbix and local test datasets (git-ignored; exports are in docs/powerbi/)
   docs/
     SPEC.md  DATA_SCHEMA.md  INSIGHTS.md  POWERBI_GUIDE.md
     powerbi/                report PDF and page images
-    design/                 DESIGN.md, PRODUCT.md, screenshots/
+    design/                 DESIGN.md, PRODUCT.md, MODE2.md (bring-your-own-dataset design), screenshots/
 ```
 
 **Where to run commands:** Python, pytest and Docker commands run from `backend/pipeline/` (`cd backend\pipeline`). The virtual environment `.venv` lives in the repository root, so activate it with `..\..\.venv\Scripts\activate` from there. Supabase CLI commands run from `backend/`. Website commands run from `frontend/`.
@@ -308,11 +335,20 @@ How to talk about this project, and the real problems hit while building it. Eve
 | Row-level security | 63 of 63 live checks pass (one company can never see another's data) | `supabase_rls_test.json` |
 | Admin and accounts | 130 of 130 live checks pass (roles, 2FA, forced password change, audit log) | `admin_panel_test.json` |
 | Worker end to end | 22 of 22 live checks pass (real CSV upload to results in Supabase) | `worker_e2e_test.json` |
+| Bring your own dataset | 4 public churn files trained on their own columns: holdout AUC 0.770 (bank), 0.902 (SaaS), 0.903 (e-commerce), 0.868 (IBM 33-column); reconciliation all pass; a non-churn file gets exploration only | `mode2_datasets.json` |
+| Leakage guard | Outcome columns put back are caught: 2 removed at single-column AUC 1.000, 1 flagged at 0.948 | `mode2_datasets.json` (`leakage columns put back`) |
+| Mode 2 live | 39 of 39 live checks pass (auto-train, change columns, other org blocked, actions only on own scored rows, Excel, broken files) | `datasets_live_test.json` |
 | Automated tests | 103 quick tests + 26 live tests | `pytest -m "not integration"` and the three live suites |
 
 ### Problems we hit and how we solved them
 
 Use the pattern **problem → cause → fix → result** when you tell these. Interviewers care most about how you found the cause.
+
+**Bring-your-own-dataset problems (short versions):**
+- *Excel uploads would have been corrupted:* the worker downloaded every file as UTF-8 text. That is fine for CSV but breaks a binary `.xlsx`. Fixed with a raw-bytes download, and a live test uploads a real workbook.
+- *A leak with an innocent name:* the name rule catches "Churn Score", but not a column called "Account Status" that copies the outcome. A single-column AUC check catches it by behaviour, and a test proves it.
+- *A fake spike in the histograms:* Spark's `least()` skips NULLs, so `least(null, 9)` put every blank value in the last bin. A unit test caught it; blanks are now excluded explicitly.
+- *A security check that could pass by accident:* in SQL, `jsonb_typeof(missing_key) <> 'array'` is NULL, not true, so a review with a missing field would slip through. The check uses `IS DISTINCT FROM`, and a live test sends a review with the field missing.
 
 **1. Spark took about 10 minutes to start.**
 - *Problem:* every Spark session sat silent for about 626 seconds before doing anything.
@@ -381,6 +417,7 @@ Use the pattern **problem → cause → fix → result** when you tell these. In
 - **"How do you know the numbers are right?"** Three ways: data-quality rules on input, 26 exact reconciliation checks against an independent recount, and fault injection proving the checks catch planted errors.
 - **"Why logistic regression and not XGBoost?"** It's explainable per customer (the top 3 reasons shown in the app), and it already beats the simple business rule clearly (49.33% vs 31.98% of churners reached with the same effort).
 - **"How is one company's data kept from another?"** Row-level security in Postgres, scoped by the user's company, with 63 live tests that try to cross the boundary and must fail.
+- **"Does it work on my data?"** "If it is customer-level churn data, yes: it profiles the file, checks it and trains a model on your own columns, with the holdout AUC shown. I tested it on four public churn datasets from banking, SaaS, e-commerce and telecom. If it is not churn data, you get the data exploration and a clear message."
 - **"What would you do next?"** Databricks Job with Unity Catalog, CI on GitHub Actions, a faster Docker volume for the worker, and monitoring for model drift.
 
 ### What not to claim

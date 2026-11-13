@@ -1,4 +1,4 @@
-import { useState, type MouseEvent } from 'react'
+import { type MouseEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabase'
 import { must, useLoad } from '../useLoad'
@@ -6,6 +6,8 @@ import { PageHead, Status } from '../components'
 import { CountUp, Explain, Pill } from '../ui'
 import { useGo } from '../nav'
 import { UploadDrop } from '../UploadDrop'
+import { useSelectedSource, useSources, sourceOptions } from '../dataSources'
+import { DatasetOverview } from '../datasetViews'
 import { Select } from '../Select'
 import { fmtReason, fmtDay, fmtMoney, fmtMonth, fmtNum, fmtPct, fmtRisk, label } from '../format'
 import { RISK_BANDS, type CustomerScore, type PipelineRun, type RiskBand, type SegmentAggregate } from '../types'
@@ -18,16 +20,9 @@ interface MonthData {
 }
 
 export default function Overview() {
-  const [month, setMonth] = useState<string | null>(null)
-
-  const months = useLoad(async () => {
-    const rows = must(
-      await supabase.from('segment_aggregates').select('snapshot_month').eq('segment_type', 'overall').order('snapshot_month', { ascending: false }),
-    ) as { snapshot_month: string }[]
-    return [...new Set(rows.map((r) => r.snapshot_month))]
-  }, [])
-
-  const selected = month ?? months.data?.[0] ?? null
+  const sources = useSources()
+  const [src, select] = useSelectedSource(sources.data)
+  const selected = src?.kind === 'telco' ? src.month : null
 
   const data = useLoad<MonthData | null>(async () => {
     if (!selected) return null
@@ -54,21 +49,24 @@ export default function Overview() {
     }
   }, [selected])
 
-  if (!months.loading && !months.error && !months.data?.length) return <Welcome />
+  if (!sources.loading && !sources.error && !sources.data?.length) return <Welcome />
 
-  const run = data.data?.run
+  const run = src?.kind === 'telco' ? data.data?.run : null
   return (
     <div className="page rise">
       <PageHead
         title="Overview"
-        meta={run ? <>From the pipeline run of {fmtDay(run.finished_at)} · <Link to={`/runs/${encodeURIComponent(run.run_id)}`}>see its checks</Link></> : selected ? fmtMonth(selected) : null}
-        actions={months.data && months.data.length > 0 && (
-          <Select label="Month" hideLabel value={selected ?? ''} onChange={setMonth}
-            options={months.data.map((m) => ({ value: m, label: fmtMonth(m) }))} />
+        meta={src?.kind === 'dataset' ? <>Dataset uploaded for {fmtMonth(src.month)} · <Link to={`/datasets/${src.id}`}>data and model details</Link></>
+          : run ? <>From the pipeline run of {fmtDay(run.finished_at)} · <Link to={`/runs/${encodeURIComponent(run.run_id)}`}>see its checks</Link></>
+          : selected ? fmtMonth(selected) : null}
+        actions={sources.data && sources.data.length > 0 && src && (
+          <Select label="Data" hideLabel value={src.value} onChange={select} options={sourceOptions(sources.data)} />
         )} />
-      <Status loading={months.loading || (data.loading && !data.data)} error={months.error ?? data.error}>
-        {data.data && <MonthView key={selected} d={data.data} />}
-      </Status>
+      {src?.kind === 'dataset' ? <DatasetOverview key={src.id} id={src.id} /> : (
+        <Status loading={sources.loading || (data.loading && !data.data)} error={sources.error ?? data.error}>
+          {data.data && <MonthView key={selected} d={data.data} />}
+        </Status>
+      )}
     </div>
   )
 }
