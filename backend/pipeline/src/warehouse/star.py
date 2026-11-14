@@ -6,10 +6,10 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
-from delta.tables import DeltaTable
 from pyspark.sql import Window
 from pyspark.sql import functions as F
 
+from src.config.storage import delta_exists, delta_table, read_delta, write_delta
 from src.config.settings import SILVER_PATH, SNAPSHOT_MONTH, WAREHOUSE_DIR
 from src.ingestion.spark_session import get_spark
 from src.output.evidence import write_evidence
@@ -36,7 +36,7 @@ def _path(warehouse_dir, table):
 
 
 def _read(spark, path):
-    return spark.read.format("delta").load(path)
+    return read_delta(spark, path)
 
 
 def _with_profile_key(df):
@@ -63,7 +63,7 @@ def build_dim_date(spark):
 def upsert_dim_customer(spark, silver, path, date_key):
     """SCD type 1 on attributes; customer_key is assigned once and never changes."""
     current = silver.select("customer_id", *CUSTOMER_ATTRS).dropDuplicates(["customer_id"])
-    exists = DeltaTable.isDeltaTable(spark, path)
+    exists = delta_exists(spark, path)
     max_key, new = 0, current
     known = None
     if exists:
@@ -81,12 +81,12 @@ def upsert_dim_customer(spark, silver, path, date_key):
         F.lit(date_key).alias("first_seen_date_key"), F.lit(date_key).alias("last_seen_date_key"),
     )
     if not exists:
-        source.write.format("delta").mode("overwrite").save(path)
+        write_delta(source, path)
         return
     updates = {a: f"s.{a}" for a in CUSTOMER_ATTRS}
     updates["first_seen_date_key"] = "least(t.first_seen_date_key, s.first_seen_date_key)"
     updates["last_seen_date_key"] = "greatest(t.last_seen_date_key, s.last_seen_date_key)"
-    (DeltaTable.forPath(spark, path).alias("t")
+    (delta_table(spark, path).alias("t")
         .merge(source.alias("s"), "t.customer_id = s.customer_id")
         .whenMatchedUpdate(set=updates)
         .whenNotMatchedInsertAll()
@@ -97,10 +97,10 @@ def upsert_dim_service_profile(spark, silver, path):
     """Junk dimension: one row per distinct combination, insert-if-absent."""
     source = (_with_profile_key(silver).select("service_profile_key", *PROFILE_COLUMNS)
               .dropDuplicates(["service_profile_key"]))
-    if not DeltaTable.isDeltaTable(spark, path):
-        source.write.format("delta").mode("overwrite").save(path)
+    if not delta_exists(spark, path):
+        write_delta(source, path)
         return
-    (DeltaTable.forPath(spark, path).alias("t")
+    (delta_table(spark, path).alias("t")
         .merge(source.alias("s"), "t.service_profile_key = s.service_profile_key")
         .whenNotMatchedInsertAll()
         .execute())
@@ -124,10 +124,8 @@ def write_fact_snapshot(spark, silver, customer_path, path, date_key, run_id):
         F.lit(False).alias("is_synthetic"),
         F.lit(run_id).alias("run_id"),
     )
-    writer = fact.write.format("delta").mode("overwrite").partitionBy("snapshot_date_key")
-    if DeltaTable.isDeltaTable(spark, path):
-        writer = writer.option("replaceWhere", f"snapshot_date_key = {date_key}")
-    writer.save(path)
+    replace = f"snapshot_date_key = {date_key}" if delta_exists(spark, path) else None
+    write_delta(fact, path, partition_by="snapshot_date_key", replace_where=replace)
 
 
 def build_warehouse(spark, silver_path=SILVER_PATH, warehouse_dir=WAREHOUSE_DIR,
@@ -143,9 +141,8 @@ def build_warehouse(spark, silver_path=SILVER_PATH, warehouse_dir=WAREHOUSE_DIR,
     upsert_dim_service_profile(spark, silver, path("dim_service_profile"))
     # dim_date is deterministic (fixed 2020-2030 range), so build it once; delete the
     # table to rebuild it if the range ever changes.
-    if not DeltaTable.isDeltaTable(spark, path("dim_date")):
-        (build_dim_date(spark).coalesce(1).write.format("delta").mode("overwrite")
-            .option("overwriteSchema", "true").save(path("dim_date")))
+    if not delta_exists(spark, path("dim_date")):
+        write_delta(build_dim_date(spark).coalesce(1), path("dim_date"), overwrite_schema=True)
     write_fact_snapshot(spark, silver, path("dim_customer"), path("fact_customer_snapshot"),
                         date_key, run_id)
 

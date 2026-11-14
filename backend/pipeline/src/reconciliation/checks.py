@@ -9,6 +9,7 @@ from pathlib import Path
 
 from pyspark.sql import functions as F
 
+from src.config.storage import read_delta
 from src.config.settings import (
     BRONZE_PATH, DQ_REPORT_JSON, GOLD_DIR, RAW_CSV, RECON_REPORT_JSON, RECON_RESULTS_PATH,
     SILVER_PATH,
@@ -63,7 +64,7 @@ def run_checks(spark, source, bronze_path, silver_path, gold_dir, dq_report_json
                                actual - expected, actual == expected))
 
     def load(path):
-        return spark.read.format("delta").load(Path(path).resolve().as_posix())
+        return read_delta(spark, path)
 
     bronze = load(bronze_path)
     silver = load(silver_path)

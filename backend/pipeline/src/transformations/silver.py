@@ -4,6 +4,7 @@ from pathlib import Path
 
 from pyspark.sql import functions as F
 
+from src.config.storage import read_delta, write_delta
 from src.config.settings import BRONZE_PATH, METADATA_COLUMNS, SILVER_PATH
 from src.ingestion.spark_session import get_spark
 from src.transformations.features import add_features
@@ -55,10 +56,9 @@ def build_silver(bronze_df):
 
 
 def write_silver(spark, bronze_path=BRONZE_PATH, silver_path=SILVER_PATH):
-    src = Path(bronze_path).resolve().as_posix()
     out = Path(silver_path).resolve().as_posix()
 
-    silver = build_silver(spark.read.format("delta").load(src))
+    silver = build_silver(read_delta(spark, bronze_path))
     bad = silver.filter(
         F.col("total_charges").isNull()
         | F.col("tenure_months").isNull()
@@ -69,10 +69,9 @@ def write_silver(spark, bronze_path=BRONZE_PATH, silver_path=SILVER_PATH):
             f"{bad} rows have null total_charges, tenure_months or monthly_charges in Silver"
         )
 
-    (silver.write.format("delta").mode("overwrite")
-        .option("overwriteSchema", "true").save(out))
+    write_delta(silver, silver_path, overwrite_schema=True)
 
-    count = spark.read.format("delta").load(out).count()
+    count = read_delta(spark, silver_path).count()
     logger.info("Silver written to %s: %d rows", out, count)
     return count
 
@@ -82,9 +81,9 @@ if __name__ == "__main__":
     start = time.perf_counter()
     spark = get_spark()
     try:
-        bronze_rows = spark.read.format("delta").load(Path(BRONZE_PATH).resolve().as_posix()).count()
+        bronze_rows = read_delta(spark, BRONZE_PATH).count()
         silver_rows = write_silver(spark)
-        silver = spark.read.format("delta").load(Path(SILVER_PATH).resolve().as_posix())
+        silver = read_delta(spark, SILVER_PATH)
         imputed = silver.filter("total_charges_imputed").count()
         print(f"Bronze rows: {bronze_rows}")
         print(f"Silver rows: {silver_rows}")

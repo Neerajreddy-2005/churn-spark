@@ -23,6 +23,8 @@ def get_spark(app_name="churn-spark", master="local[*]"):
     active = SparkSession.getActiveSession()
     if active is not None:  # e.g. Databricks notebooks already have a session
         return active
+    if "DATABRICKS_RUNTIME_VERSION" in os.environ:  # Databricks job script: the platform's (serverless) session
+        return SparkSession.builder.getOrCreate()
 
     _check_java_home()
     # Python workers (createDataFrame etc.) must run in this interpreter, not whatever

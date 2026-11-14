@@ -4,6 +4,8 @@ from pathlib import Path
 
 from pyspark.sql.types import DoubleType, LongType, StringType, StructField, StructType
 
+from src.config.storage import write_delta
+
 logger = logging.getLogger(__name__)
 
 RESULT_SCHEMA = StructType([
@@ -26,7 +28,7 @@ def write_results(spark, results, results_path, report_json):
     rows = [tuple(r[f.name] for f in RESULT_SCHEMA.fields) for r in results]
     # A few dozen rows: write one file instead of one per CPU core.
     df = spark.createDataFrame(rows, RESULT_SCHEMA).coalesce(1)
-    df.write.format("delta").mode("append").save(out)
+    write_delta(df, out, mode="append")
 
     summary = {s: sum(1 for r in results if r["status"] == s) for s in ("pass", "warn", "fail")}
     report = {

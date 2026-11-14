@@ -1,0 +1,46 @@
+# Databricks Asset Bundle: the scheduled pipeline job on Databricks Free Edition (serverless).
+# The workspace comes from DATABRICKS_HOST / DATABRICKS_TOKEN in the environment
+# (loaded from the git-ignored .env.databricks; never committed).
+# One-time setup and deploy commands: see "Databricks" in the README.
+bundle:
+  name: churn-spark
+
+sync:
+  # Only code and config go to the workspace; data, models, jars and secrets stay local.
+  exclude:
+    - data/**
+    - models/**
+    - jars/**
+    - tests/**
+    - sql/**
+    - .env
+    - Dockerfile
+    - compose.yaml
+
+targets:
+  free:
+    default: true
+
+resources:
+  jobs:
+    churn_pipeline:
+      name: churn-spark-pipeline
+      description: Bronze -> data quality -> Silver -> Gold -> reconciliation -> star schema -> train -> score, same src/ modules as the laptop, writing Unity Catalog tables in workspace.churn_spark.
+      max_concurrent_runs: 1
+      timeout_seconds: 3600
+      schedule:
+        quartz_cron_expression: "0 0 6 * * ?"  # daily 06:00
+        timezone_id: Asia/Kolkata
+        pause_status: UNPAUSED
+      tasks:
+        - task_key: run_pipeline
+          spark_python_task:
+            python_file: ./jobs/run_pipeline.py
+            parameters: ["--catalog", "workspace", "--schema", "churn_spark", "--volume", "files",
+                         "--code-root", "${workspace.file_path}"]
+          environment_key: serverless_v4
+      environments:
+        # Version 4 is needed: Spark ML (LogisticRegression fit/save/load) failed on version 3 (probe, 2026-11-14).
+        - environment_key: serverless_v4
+          spec:
+            environment_version: "4"

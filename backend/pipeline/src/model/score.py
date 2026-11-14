@@ -6,10 +6,10 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from delta.tables import DeltaTable
 from pyspark.ml import PipelineModel
 from pyspark.sql import functions as F
 
+from src.config.storage import UC_SCHEMA, cache, delta_table, read_delta, write_delta
 from src.config.settings import (
     MODEL_DIR, MODEL_SCORES_PATH, MODEL_SCORING_JSON, SILVER_PATH, SNAPSHOT_MONTH, WAREHOUSE_DIR,
 )
@@ -41,7 +41,7 @@ def score_customers(spark, model_path=MODEL_DIR, silver_path=SILVER_PATH, scored
     model_dir = Path(model_path).resolve()
     meta = json.loads((model_dir / META_FILE).read_text(encoding="utf-8"))
     model = PipelineModel.load(model_dir.as_posix())
-    silver = spark.read.format("delta").load(Path(silver_path).resolve().as_posix())
+    silver = read_delta(spark, silver_path)
     train_ids = (spark.read.parquet((model_dir / TRAIN_IDS).as_posix())
                  .select("customer_id", F.lit(True).alias("in_training_set")))
 
@@ -62,19 +62,20 @@ def score_customers(spark, model_path=MODEL_DIR, silver_path=SILVER_PATH, scored
 
 def write_scores(scores, path=MODEL_SCORES_PATH):
     out = Path(path).resolve()
-    out.parent.mkdir(parents=True, exist_ok=True)
-    scores.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(out.as_posix())
+    if not UC_SCHEMA:
+        out.parent.mkdir(parents=True, exist_ok=True)
+    write_delta(scores, out, overwrite_schema=True)
 
 
 def update_warehouse_scores(spark, scores, warehouse_dir=WAREHOUSE_DIR, snapshot_month=SNAPSHOT_MONTH):
     """MERGE risk_score and risk_band into the fact rows of one snapshot month. Idempotent."""
     date_key = month_key(snapshot_month)
     wh = Path(warehouse_dir)
-    customers = (spark.read.format("delta").load((wh / "dim_customer").resolve().as_posix())
+    customers = (read_delta(spark, wh / "dim_customer")
                  .select("customer_id", "customer_key"))
     source = scores.join(customers, "customer_id").select(
         "customer_key", F.col("risk_score").cast("decimal(5,4)").alias("risk_score"), "risk_band")
-    fact = DeltaTable.forPath(spark, (wh / "fact_customer_snapshot").resolve().as_posix())
+    fact = delta_table(spark, wh / "fact_customer_snapshot")
     (fact.alias("t")
         .merge(source.alias("s"),
                f"t.snapshot_date_key = {date_key} AND t.customer_key = s.customer_key")
@@ -98,7 +99,7 @@ if __name__ == "__main__":
     spark = get_spark()
     try:
         write_scores(score_customers(spark))
-        scores = spark.read.format("delta").load(Path(MODEL_SCORES_PATH).resolve().as_posix()).cache()
+        scores = cache(read_delta(spark, MODEL_SCORES_PATH))
         update_warehouse_scores(spark, scores, snapshot_month=args.snapshot_month)
         counts, rows = band_counts(scores), scores.count()
         elapsed = time.perf_counter() - start

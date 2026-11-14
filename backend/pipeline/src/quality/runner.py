@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+from src.config.storage import cache, read_delta, uncache
 from src.config.settings import (
     BRONZE_PATH, DQ_REPORT_JSON, DQ_RESULTS_PATH, DQ_RULES_PATH, EXPECTED_RAW_COLUMNS,
 )
@@ -47,7 +48,7 @@ def rule_status(failing, checked, threshold, action):
 
 def run_checks(df, rules, run_id):
     run_ts = datetime.now(timezone.utc).isoformat()
-    df = df.cache()
+    df = cache(df)
     try:
         total = df.count()
         results = []
@@ -78,7 +79,7 @@ def run_checks(df, rules, run_id):
             logger.info("%s %s: %d/%d failing", rule["id"], status, failing, checked)
         return results
     finally:
-        df.unpersist()
+        uncache(df)
 
 
 def enforce(results):
@@ -91,7 +92,7 @@ def run_dq(spark, bronze_path=BRONZE_PATH, rules_path=DQ_RULES_PATH,
            results_path=DQ_RESULTS_PATH, report_json=DQ_REPORT_JSON, run_id=None):
     run_id = run_id or uuid.uuid4().hex
     rules = load_rules(rules_path)
-    df = spark.read.format("delta").load(Path(bronze_path).resolve().as_posix())
+    df = read_delta(spark, bronze_path)
     results = run_checks(df, rules, run_id)
     write_results(spark, results, results_path, report_json)
     enforce(results)

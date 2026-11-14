@@ -81,7 +81,13 @@ def slot_name(slot):
 
 def churn_probability(probability_col="probability"):
     """P(churn) from the probability vector, via the JVM function (no Python UDF).
-    pyspark.ml.functions.vector_to_array needs pandas at import time, which we do not install."""
+    pyspark.ml.functions.vector_to_array needs pandas at import time, which we do not install.
+    Databricks serverless has no JVM access but does ship pandas, so there we use vector_to_array."""
+    from src.config.storage import ON_DATABRICKS
+    if ON_DATABRICKS:
+        from pyspark.ml.functions import vector_to_array
+        return vector_to_array(F.col(probability_col), "float64")[1]
+
     from pyspark import SparkContext
     from pyspark.sql.column import Column, _to_java_column
 

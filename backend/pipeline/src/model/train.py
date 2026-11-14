@@ -9,6 +9,7 @@ from pyspark.ml.evaluation import BinaryClassificationEvaluator
 from pyspark.ml.stat import Summarizer
 from pyspark.sql import functions as F
 
+from src.config.storage import cache, read_delta, uncache
 from src.config.settings import MODEL_DIR, MODEL_METRICS_JSON, SILVER_PATH
 from src.ingestion.spark_session import get_spark
 from src.model.features import (
@@ -149,9 +150,9 @@ def save_model(model, meta, train, model_dir):
 def train_and_evaluate(spark, silver_path=SILVER_PATH, model_dir=MODEL_DIR,
                        metrics_path=MODEL_METRICS_JSON, run_id=None):
     run_id = run_id or uuid.uuid4().hex
-    silver = spark.read.format("delta").load(Path(silver_path).resolve().as_posix())
+    silver = read_delta(spark, silver_path)
     train, test = stratified_split(prepare(silver))
-    train, test = train.cache(), test.cache()
+    train, test = cache(train), cache(test)
 
     model = build_pipeline().fit(train)
     meta = model_meta(model, train, run_id)
@@ -171,8 +172,8 @@ def train_and_evaluate(spark, silver_path=SILVER_PATH, model_dir=MODEL_DIR,
         "model_path": str(Path(model_dir).resolve()),
     }
     path = write_evidence(Path(metrics_path).name, payload, Path(metrics_path).parent)
-    train.unpersist()
-    test.unpersist()
+    uncache(train)
+    uncache(test)
     return payload, path
 
 

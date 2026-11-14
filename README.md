@@ -109,7 +109,7 @@ Each file was run through the real code (`python -m src.evidence.mode2_datasets 
    SQL Server Express (star schema, JDBC) -> Power BI Desktop
 
  DATABRICKS Free Edition
-   Same src/ modules as notebooks, scheduled Job, Unity Catalog Delta tables
+   Same src/ modules as a scheduled serverless Job, Unity Catalog Delta tables
 ```
 
 The pipeline runs on the owner's laptop as a batch job; uploads wait with status `queued` until it runs. The same `src/` modules also run in Databricks Free Edition as a scheduled Job; see `SPEC.md`.
@@ -160,6 +160,8 @@ Churn-Spark/
         output/             SQL Server setup and writer
         generic/            Mode 2: reader (CSV/XLSX), profile, suggestions, general checks, training
         integration/        Supabase worker (dataset_worker.py for Mode 2), admin CLI, migration runner
+      jobs/                 Databricks Job entry (run_pipeline.py) and evidence export
+      databricks.yml        Databricks Asset Bundle: the scheduled serverless job
       tests/                pytest, local SparkSession fixture
       config/               dq_rules.json (DQ rules and thresholds), no secrets
       sql/ddl/  sql/analysis/   SQL Server tables and T-SQL analysis queries
@@ -221,12 +223,11 @@ SQLSERVER_AUTH=integrated
 # Laptop pipeline only. Never put the service-role key in the frontend or in git.
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
-# Only for the Databricks variant, if used
-DATABRICKS_HOST=
-DATABRICKS_TOKEN=
 ```
 
-`.env` must be listed in `.gitignore` before the first commit. In Databricks, use secret scopes instead of `.env`.
+Databricks credentials go in a separate git-ignored `backend/pipeline/.env.databricks` (two lines, `DATABRICKS_HOST=` and `DATABRICKS_TOKEN=`), so the worker container, which loads `.env`, never receives the token.
+
+`.env` must be listed in `.gitignore` before the first commit. The Databricks token is only used by the CLI on the laptop to deploy and start the job; the job itself needs no secrets.
 
 ## Supabase setup
 
@@ -301,7 +302,36 @@ Each run records its wall-clock time per stage in a run log. Runtime is measured
 
 ## Databricks Free Edition
 
-Free Edition offers serverless compute only. Community Edition is being replaced, so check the current limits and sign-up flow on the Databricks site before relying on it. The same `src/` modules run as notebooks and a scheduled Job, writing Delta tables to Unity Catalog. The repo will contain the notebooks, the exported job definition and screenshots (Phase 9). The SQL Server step does not run there because cloud Databricks generally cannot reach a SQL Server on a laptop.
+The same `src/` modules run as a scheduled Databricks Job on Free Edition (serverless only, no credit card), writing Delta tables to Unity Catalog. The job is defined in code as a Databricks Asset Bundle (`backend/pipeline/databricks.yml`); the entry script is `backend/pipeline/jobs/run_pipeline.py`.
+
+**What ran where**
+
+| Step | Laptop | Databricks Job |
+|---|---|---|
+| Bronze, data quality, Silver, Gold, reconciliation | Delta folders under `backend/pipeline/data/` | Unity Catalog tables `workspace.churn_spark.*` (e.g. `silver_telco_customers`) |
+| Star schema (dims + fact, MERGE upserts) | Delta folders under `data/warehouse/` | UC tables `warehouse_dim_customer`, `warehouse_fact_customer_snapshot`, ... |
+| Train + score (Spark MLlib) | `models/churn_lr` | model and JSON reports in the Volume `/Volumes/workspace/churn_spark/files` |
+| SQL Server copy, Power BI, Supabase upload worker, live website | yes | no: Free Edition only reaches trusted domains, not a laptop SQL Server or Supabase |
+
+One switch decides where tables go: `src/config/storage.py`. With `CHURN_UC_SCHEMA` unset (laptop) a stage path is a Delta folder; with `CHURN_UC_SCHEMA=catalog.schema` the same path maps to a managed table. `CHURN_DATA_ROOT` moves the raw CSV, reports and model into the Volume.
+
+**Measured on Databricks (7,043 rows, serverless environment 4, Spark 4.2.0, 2026-11-14):** three successful runs, two started by hand and one by the schedule; job durations including serverless start-up 164.9 s, 139.3 s and 131.9 s (scheduled run: 115.0 s inside the pipeline itself). One earlier run failed and is kept in the history (the `__file__` issue below). Results matched the laptop exactly: data quality 19 pass / 1 warn / 0 fail, reconciliation 26/26 pass, test AUC-ROC 0.8328 and AUC-PR 0.6624, risk bands 953 high / 1,665 medium / 4,425 low. Proof: `data/evidence/databricks_run.json` (per-stage seconds), `databricks_run_history.json` and `databricks_job_definition.json` (both exported with `python jobs/export_evidence.py`; emails and workspace URLs removed).
+
+**Serverless differences we found (by a probe run, not assumed):** `df.cache()` and `spark.sparkContext` are not supported, so `storage.cache()` is a no-op there; Spark ML needs serverless environment version 4 (it fails on 3); the script runs through `exec()`, so `__file__` is undefined and the bundle passes the code folder as `--code-root`.
+
+**Set up and run (from `backend/pipeline/`, with `DATABRICKS_HOST` and `DATABRICKS_TOKEN` in `.env.databricks` (load them into the shell first) and the [Databricks CLI](https://github.com/databricks/cli) installed):**
+
+```
+databricks schemas create churn_spark workspace
+databricks volumes create workspace churn_spark files MANAGED
+databricks fs mkdir dbfs:/Volumes/workspace/churn_spark/files/raw
+databricks fs cp data/raw/Telco-Customer-Churn.csv dbfs:/Volumes/workspace/churn_spark/files/raw/
+databricks bundle deploy          # creates/updates the job (daily 06:00 Asia/Kolkata)
+databricks bundle run churn_pipeline
+python jobs/export_evidence.py    # job definition + run history into data/evidence/
+```
+
+In Git Bash, set `MSYS_NO_PATHCONV=1` first, or it rewrites `/Volumes/...` and `/Users/...` into Windows paths.
 
 ## Resume bullet template
 

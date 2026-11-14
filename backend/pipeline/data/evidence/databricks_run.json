@@ -1,0 +1,85 @@
+{
+  "run_id": "7fffc64743ce4d0abbaa1770e058cdab",
+  "runtime": "databricks-serverless",
+  "databricks_runtime_version": "client.4.10",
+  "spark_version": "4.2.0",
+  "uc_schema": "workspace.churn_spark",
+  "snapshot_month": "2026-10",
+  "timestamp": "2026-11-14T10:29:12.118219+00:00",
+  "total_seconds": 115.0,
+  "stages": [
+    {
+      "stage": "bronze",
+      "seconds": 6.9,
+      "result": {
+        "rows": 7043
+      }
+    },
+    {
+      "stage": "data_quality",
+      "seconds": 11.1,
+      "result": {
+        "pass": 19,
+        "warn": 1,
+        "fail": 0
+      }
+    },
+    {
+      "stage": "silver",
+      "seconds": 3.7,
+      "result": {
+        "rows": 7043
+      }
+    },
+    {
+      "stage": "gold",
+      "seconds": 13.3,
+      "result": {
+        "gold_churn_overall": 1,
+        "gold_churn_by_internet_service": 3,
+        "gold_churn_by_contract": 3,
+        "gold_churn_by_payment_method": 4,
+        "gold_churn_by_tenure_band": 4
+      }
+    },
+    {
+      "stage": "reconciliation",
+      "seconds": 7.3,
+      "result": {
+        "pass": 26,
+        "fail": 0
+      }
+    },
+    {
+      "stage": "warehouse",
+      "seconds": 13.1,
+      "result": {
+        "dim_customer": 7043,
+        "dim_service_profile": 2386,
+        "dim_date": 4018,
+        "fact_customer_snapshot": 7043,
+        "fact_customer_snapshot_month": 7043
+      }
+    },
+    {
+      "stage": "train",
+      "seconds": 33.0,
+      "result": {
+        "auc_roc_test": 0.8328,
+        "auc_pr_test": 0.6624
+      }
+    },
+    {
+      "stage": "score",
+      "seconds": 26.6,
+      "result": {
+        "customers_scored": 7043,
+        "band_counts": {
+          "high": 953,
+          "medium": 1665,
+          "low": 4425
+        }
+      }
+    }
+  ]
+}

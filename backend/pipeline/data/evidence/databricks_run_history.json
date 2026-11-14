@@ -1,0 +1,90 @@
+[
+  {
+    "run_id": 853465319587517,
+    "run_name": "churn-spark-pipeline",
+    "start_time": 1794652023572,
+    "end_time": 1794652155476,
+    "run_duration": 131904,
+    "trigger": "PERIODIC",
+    "state": {
+      "life_cycle_state": "TERMINATED",
+      "result_state": "SUCCESS",
+      "state_message": "",
+      "user_cancelled_or_timedout": false
+    },
+    "status": {
+      "state": "TERMINATED",
+      "termination_details": {
+        "code": "SUCCESS",
+        "message": "",
+        "type": "SUCCESS"
+      }
+    }
+  },
+  {
+    "run_id": 814150263517868,
+    "run_name": "churn-spark-pipeline",
+    "start_time": 1794651411492,
+    "end_time": 1794651550787,
+    "run_duration": 139295,
+    "trigger": "ONE_TIME",
+    "state": {
+      "life_cycle_state": "TERMINATED",
+      "result_state": "SUCCESS",
+      "state_message": "",
+      "user_cancelled_or_timedout": false
+    },
+    "status": {
+      "state": "TERMINATED",
+      "termination_details": {
+        "code": "SUCCESS",
+        "message": "",
+        "type": "SUCCESS"
+      }
+    }
+  },
+  {
+    "run_id": 542010270610213,
+    "run_name": "churn-spark-pipeline",
+    "start_time": 1794651228954,
+    "end_time": 1794651393837,
+    "run_duration": 164883,
+    "trigger": "ONE_TIME",
+    "state": {
+      "life_cycle_state": "TERMINATED",
+      "result_state": "SUCCESS",
+      "state_message": "",
+      "user_cancelled_or_timedout": false
+    },
+    "status": {
+      "state": "TERMINATED",
+      "termination_details": {
+        "code": "SUCCESS",
+        "message": "",
+        "type": "SUCCESS"
+      }
+    }
+  },
+  {
+    "run_id": 511974146484034,
+    "run_name": "churn-spark-pipeline",
+    "start_time": 1794651138132,
+    "end_time": 1794651177385,
+    "run_duration": 39253,
+    "trigger": "ONE_TIME",
+    "state": {
+      "life_cycle_state": "INTERNAL_ERROR",
+      "result_state": "FAILED",
+      "state_message": "Task run_pipeline failed with message: Workload failed, see run output for details.",
+      "user_cancelled_or_timedout": false
+    },
+    "status": {
+      "state": "TERMINATED",
+      "termination_details": {
+        "code": "RUN_EXECUTION_ERROR",
+        "message": "Task run_pipeline failed with message: Workload failed, see run output for details.",
+        "type": "CLIENT_ERROR"
+      }
+    }
+  }
+]

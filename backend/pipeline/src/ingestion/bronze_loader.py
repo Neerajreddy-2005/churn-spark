@@ -5,6 +5,7 @@ from pathlib import Path
 
 from pyspark.sql import functions as F
 
+from src.config.storage import read_delta, write_delta
 from src.config.settings import BRONZE_PATH, EXPECTED_RAW_COLUMNS, RAW_CSV, REQUIRED_RAW_COLUMNS
 from src.ingestion.spark_session import get_spark
 
@@ -51,10 +52,9 @@ def load_bronze(spark, csv_path=RAW_CSV, bronze_path=BRONZE_PATH, batch_id=None)
     validate_columns(df)
     df = add_metadata(df, Path(csv_path).name, batch_id)
 
-    (df.write.format("delta").mode("overwrite")
-        .option("overwriteSchema", "true").save(out))
+    write_delta(df, bronze_path, overwrite_schema=True)
 
-    count = spark.read.format("delta").load(out).count()
+    count = read_delta(spark, bronze_path).count()
     logger.info("Bronze written to %s (batch %s): %d rows", out, batch_id, count)
     return count
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     spark = get_spark()
     csv_rows = read_raw(spark, RAW_CSV).count()
     bronze_rows = load_bronze(spark)
-    cols = len(spark.read.format("delta").load(Path(BRONZE_PATH).resolve().as_posix()).columns)
+    cols = len(read_delta(spark, BRONZE_PATH).columns)
     elapsed = time.perf_counter() - start
     print(f"CSV rows: {csv_rows}")
     print(f"Bronze rows: {bronze_rows}")

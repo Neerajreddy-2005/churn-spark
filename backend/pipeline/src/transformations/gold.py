@@ -4,6 +4,7 @@ from pathlib import Path
 
 from pyspark.sql import functions as F
 
+from src.config.storage import read_delta, write_delta
 from src.config.settings import GOLD_DIR, GOLD_OVERALL, GOLD_SEGMENTS, SILVER_PATH
 from src.ingestion.spark_session import get_spark
 
@@ -46,13 +47,12 @@ def build_gold(silver_df):
 
 
 def write_gold(spark, silver_path=SILVER_PATH, gold_dir=GOLD_DIR):
-    silver = spark.read.format("delta").load(Path(silver_path).resolve().as_posix())
+    silver = read_delta(spark, silver_path)
     counts = {}
     for name, df in build_gold(silver).items():
         out = (Path(gold_dir) / name).resolve().as_posix()
-        (df.coalesce(1).write.format("delta").mode("overwrite")
-            .option("overwriteSchema", "true").save(out))
-        counts[name] = spark.read.format("delta").load(out).count()
+        write_delta(df.coalesce(1), out, overwrite_schema=True)
+        counts[name] = read_delta(spark, out).count()
         logger.info("Gold table %s written to %s: %d rows", name, out, counts[name])
     return counts
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         counts = write_gold(spark)
         for name in counts:
             print(name)
-            spark.read.format("delta").load((Path(GOLD_DIR) / name).resolve().as_posix()).show(truncate=False)
+            read_delta(spark, Path(GOLD_DIR) / name).show(truncate=False)
         print(f"Elapsed seconds: {time.perf_counter() - start:.1f}")
     finally:
         spark.stop()
