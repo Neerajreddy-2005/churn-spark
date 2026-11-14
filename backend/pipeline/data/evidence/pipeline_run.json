@@ -1,0 +1,115 @@
+{
+  "run_id": "1232fe874fd44cd4bf2651c958b03914",
+  "runtime": "laptop",
+  "spark_version": "3.5.9",
+  "snapshot_month": "2026-10",
+  "started": "2026-11-14T16:36:03.742650+05:30",
+  "status": "ok",
+  "stages": [
+    {
+      "stage": "bronze",
+      "result": {
+        "rows": 7043
+      },
+      "status": "ok",
+      "seconds": 25.7
+    },
+    {
+      "stage": "dq",
+      "result": {
+        "pass": 19,
+        "warn": 1
+      },
+      "status": "ok",
+      "seconds": 26.3
+    },
+    {
+      "stage": "silver",
+      "result": {
+        "rows": 7043
+      },
+      "status": "ok",
+      "seconds": 9.9
+    },
+    {
+      "stage": "gold",
+      "result": {
+        "gold_churn_overall": 1,
+        "gold_churn_by_internet_service": 3,
+        "gold_churn_by_contract": 3,
+        "gold_churn_by_payment_method": 4,
+        "gold_churn_by_tenure_band": 4
+      },
+      "status": "ok",
+      "seconds": 24.4
+    },
+    {
+      "stage": "reconcile",
+      "result": {
+        "pass": 26
+      },
+      "status": "ok",
+      "seconds": 18.0
+    },
+    {
+      "stage": "warehouse",
+      "result": {
+        "dim_customer": 7043,
+        "dim_service_profile": 2386,
+        "dim_date": 4018,
+        "fact_customer_snapshot": 7043,
+        "fact_customer_snapshot_month": 7043
+      },
+      "status": "ok",
+      "seconds": 18.5
+    },
+    {
+      "stage": "train",
+      "result": {
+        "auc_roc_test": 0.8328,
+        "auc_pr_test": 0.6624
+      },
+      "status": "ok",
+      "seconds": 13.7
+    },
+    {
+      "stage": "score",
+      "result": {
+        "customers_scored": 7043,
+        "band_counts": {
+          "high": 953,
+          "medium": 1665,
+          "low": 4425
+        }
+      },
+      "status": "ok",
+      "seconds": 13.5
+    },
+    {
+      "stage": "sqlserver",
+      "result": {
+        "tables": {
+          "dim_customer": 7043,
+          "dim_service_profile": 2386,
+          "dim_date": 4018,
+          "fact_customer_snapshot": 7043,
+          "gold_churn_overall": 1,
+          "gold_churn_by_internet_service": 3,
+          "gold_churn_by_contract": 3,
+          "gold_churn_by_payment_method": 4,
+          "gold_churn_by_tenure_band": 4,
+          "customer_scores": 7043,
+          "dq_results": 20,
+          "reconciliation_results": 26
+        },
+        "checks": {
+          "pass": 21
+        }
+      },
+      "status": "ok",
+      "seconds": 39.2
+    }
+  ],
+  "total_seconds": 189.2,
+  "finished": "2026-11-14T16:39:12.971416+05:30"
+}

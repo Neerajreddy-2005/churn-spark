@@ -104,6 +104,7 @@ def test_has_internet(spark):
     assert (a.has_internet, b.has_internet, c.has_internet) == (True, True, False)
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_write_silver_rejects_bad_total_charges(spark, tmp_path):
     bronze = tmp_path / "bronze"
     bronze_df(spark, [{"TotalCharges": "abc"}]).write.format("delta").save(bronze.resolve().as_posix())

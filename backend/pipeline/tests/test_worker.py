@@ -126,6 +126,7 @@ def test_process_upload_removes_its_run_dir(tmp_path, monkeypatch, outcome):
     assert not (tmp_path / "uploads" / upload["id"]).exists()
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_segment_aggregate_rows_money(spark):
     rows = [  # customer, contract, internet, payment, tenure, band, charges, churn
         ("a", "Month-to-month", "DSL", "Mailed check", 3, "0-12", 10.10, True),
@@ -321,6 +322,7 @@ def test_dq_reason_lists_ids_descriptions_and_counts():
     assert "dq16" in format_reason(dq_reason(many))  # every id survives the 500-char cap
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_segment_aggregate_rows_unlabelled(spark):
     rows = [("a", "Month-to-month", "DSL", "Mailed check", 3, "0-12", 10.10, None),
             ("b", "Two year", "DSL", "Mailed check", 80, "73+", 20.20, None)]

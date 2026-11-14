@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pipeline-quick-tests:
+    name: Pipeline quick tests (pytest -m "not integration")
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: backend/pipeline
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: pip
+          cache-dependency-path: backend/pipeline/requirements*.txt
+      - name: Cache Spark packages (Delta, JDBC drivers from Maven)
+        uses: actions/cache@v4
+        with:
+          path: ~/.ivy2
+          key: ivy-${{ hashFiles('backend/pipeline/src/config/settings.py') }}
+      - run: pip install -r requirements-dev.txt
+      # The raw CSV, model and SQL Server are not in the repo: tests that need them are marked
+      # integration or skip themselves, so this run proves the logic, not the real-data numbers.
+      - name: Quick tests with coverage
+        run: pytest -m "not integration" -q --durations=10 --cov=src --cov-report=term --cov-fail-under=45  # measured 50% on 2026-11-14 (quick tier, no raw data)
+
+  frontend:
+    name: Frontend lint + build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build

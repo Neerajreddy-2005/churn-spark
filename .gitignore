@@ -38,3 +38,8 @@ frontend/dist/
 
 # Supabase CLI local link state
 backend/supabase/.temp/
+
+# Coverage data from pytest --cov
+.coverage
+.coverage.*
+htmlcov/

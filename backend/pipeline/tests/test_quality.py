@@ -137,6 +137,7 @@ def test_load_rules_rejects_duplicate_ids(tmp_path):
         load_rules(path)
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_run_dq_records_results_even_when_enforce_raises(spark, tmp_path):
     bronze = tmp_path / "bronze"
     raw = [tuple(["x"] * 21)] * 2  # duplicated customerID

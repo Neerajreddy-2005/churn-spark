@@ -39,6 +39,7 @@ def trained(spark, tmp_path_factory):
     return result, scores.collect(), s
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_leak_with_innocent_name_is_removed(trained):
     result, _, s = trained
     assert "c4" in s["features"]  # the name rule cannot see it ...
@@ -47,6 +48,7 @@ def test_leak_with_innocent_name_is_removed(trained):
     assert "Account Status" not in result["features"]["text"]
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_metrics_are_honest(trained):
     result, _, _ = trained
     m = result["metrics"]
@@ -57,6 +59,7 @@ def test_metrics_are_honest(trained):
     assert result["features"]["missing_flags"] == ["Calls"]
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_scores_reasons_and_reconciliation(trained):
     result, scores, _ = trained
     assert len(scores) == 600 and len({r["row_id"] for r in scores}) == 600
@@ -67,6 +70,7 @@ def test_scores_reasons_and_reconciliation(trained):
     assert result["reconciled"] and all(r["status"] == "pass" for r in result["reconciliation"])
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_drivers_and_insights(trained):
     result, _, _ = trained
     feats = [d["feature"] for d in result["drivers"]]
@@ -77,6 +81,7 @@ def test_drivers_and_insights(trained):
     assert all(sum(s["customers"] for s in f["segments"]) == 600 for f in result["insights"])
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_one_class_holdout_is_refused(spark, tmp_path):
     rows = [[f"C{i}", "Basic", str(i % 5), "Yes" if i < 3 else "No"] for i in range(300)]
     cols = write_canonical(["CustomerID", "Plan", "Calls", "Churn"], rows, tmp_path / "c.csv")
@@ -88,6 +93,7 @@ def test_one_class_holdout_is_refused(spark, tmp_path):
         train_dataset(spark, tmp_path / "c.csv", prof, review)
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_insight_labels_are_readable(trained):
     result, _, _ = trained
     calls = next(f for f in result["insights"] if f["name"] == "Calls")
@@ -100,6 +106,7 @@ def test_insight_labels_are_readable(trained):
     assert _bin_label({"from": 84.6, "to": 92}, True, True) == "85 to 92"
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_reasons_read_as_words(spark, tmp_path):
     rng = random.Random(3)
     rows = []

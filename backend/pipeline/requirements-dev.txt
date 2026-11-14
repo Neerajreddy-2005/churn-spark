@@ -1,0 +1,4 @@
+# Test-only extras (CI and laptop), not installed in the worker image.
+-r requirements.txt
+pytest-cov==7.1.0
+coverage==7.16.2

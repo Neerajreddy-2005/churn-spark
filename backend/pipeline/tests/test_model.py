@@ -50,6 +50,7 @@ def test_prepare_keeps_only_id_label_and_features(spark):
     assert dict(out.dtypes)["partner"] == "double"
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_stratified_split_keeps_classes_and_is_disjoint(spark):
     train, test = stratified_split(toy_df(spark, 200))
     for part in (train, test):
@@ -108,6 +109,7 @@ def test_top_reasons_cut_long_names():
     assert category == "x" * 39 + "… = " + "y" * 39 + "…"
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_reasons_on_toy_pipeline(spark):
     data = prepare(toy_df(spark))
     model = build_pipeline().fit(data)

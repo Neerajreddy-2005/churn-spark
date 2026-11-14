@@ -56,6 +56,7 @@ def build_month(spark, wh, rows, month, run_id):
                         key, run_id)
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_dim_customer_keys_stable_and_new_only(spark, tmp_path):
     wh = tmp_path / "wh"
     build_month(spark, wh, [silver_row("b"), silver_row("a")], "2026-10", "r1")
@@ -72,6 +73,7 @@ def test_dim_customer_keys_stable_and_new_only(spark, tmp_path):
     assert rows["a"]["last_seen_date_key"] == 20261001  # absent in month 2, untouched
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_service_profile_key_deterministic_and_deduped(spark, tmp_path):
     wh = tmp_path / "wh"
     rows = [silver_row("a"), silver_row("b"), silver_row("c", contract="Two year")]
@@ -102,6 +104,7 @@ def test_dim_date_boundaries(spark):
     assert month_key("2026-10") == 20261001
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_snapshot_replace_where_is_idempotent_per_month(spark, tmp_path):
     wh = tmp_path / "wh"
     build_month(spark, wh, [silver_row("a"), silver_row("b")], "2026-10", "A1")

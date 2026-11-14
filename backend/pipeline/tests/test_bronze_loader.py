@@ -26,22 +26,26 @@ def bronze(spark, tmp_path):
     return count, spark.read.format("delta").load(out.as_posix())
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_row_count(bronze):
     count, df = bronze
     assert count == 3
     assert df.count() == 3
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_columns_in_order(bronze):
     _, df = bronze
     assert df.columns == EXPECTED_RAW_COLUMNS + METADATA_COLUMNS
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_raw_columns_are_string(bronze):
     _, df = bronze
     assert all(isinstance(df.schema[c].dataType, StringType) for c in EXPECTED_RAW_COLUMNS)
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_blank_total_charges_preserved(bronze):
     _, df = bronze
     row = df.filter(df.customerID == "4472-LVYGI").first()
@@ -49,6 +53,7 @@ def test_blank_total_charges_preserved(bronze):
     assert row["tenure"] == "0"
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_metadata_values(bronze):
     _, df = bronze
     row = df.first()
@@ -57,6 +62,7 @@ def test_metadata_values(bronze):
     assert row["_ingest_ts"] is not None
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_rerun_does_not_duplicate(spark, tmp_path):
     csv = write_csv(tmp_path)
     out = tmp_path / "bronze"
@@ -73,6 +79,7 @@ def test_missing_column_raises(spark, tmp_path):
         load_bronze(spark, csv, tmp_path / "bronze")
 
 
+@pytest.mark.integration  # writes Delta / trains a model: slow on a laptop
 def test_missing_churn_is_accepted(spark, tmp_path):
     cols = EXPECTED_RAW_COLUMNS[:-1]
     rows = [",".join(r.split(",")[:-1]) for r in ROWS]

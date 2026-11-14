@@ -1,6 +1,6 @@
 {
-  "run_id": "b7bd4cd7f6404cfa910646b3910d1792",
-  "timestamp": "2026-11-12T18:50:26.278334+05:30",
+  "run_id": "1232fe874fd44cd4bf2651c958b03914",
+  "timestamp": "2026-11-14T16:38:19.945443+05:30",
   "seed": 42,
   "features": {
     "categorical": [
@@ -189,5 +189,5 @@
       "coefficient": -0.0684
     }
   ],
-  "model_path": "C:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\models\\churn_lr"
+  "model_path": "C:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\backend\\pipeline\\models\\churn_lr"
 }

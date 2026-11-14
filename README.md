@@ -145,9 +145,11 @@ Pin exact versions in `requirements.txt` once Phase 1 installs succeed.
 ```
 Churn-Spark/
   README.md
+  .github/workflows/ci.yml  CI: quick pipeline tests + coverage, frontend lint + build
   backend/
     pipeline/               everything Python / Spark / Docker (run its commands from this folder)
       src/
+        pipeline.py         single entry point (python -m src.pipeline), per-stage run log
         config/             settings.py (paths, table names), Supabase and SQL Server settings
         ingestion/          spark_session.py, bronze_loader.py
         quality/            rule definitions, runner, report writer
@@ -165,7 +167,7 @@ Churn-Spark/
       tests/                pytest, local SparkSession fixture
       config/               dq_rules.json (DQ rules and thresholds), no secrets
       sql/ddl/  sql/analysis/   SQL Server tables and T-SQL analysis queries
-      Dockerfile  compose.yaml  requirements.txt  pytest.ini
+      Dockerfile  compose.yaml  requirements.txt  requirements-dev.txt  pytest.ini
       .env.example  .env    .env is git-ignored
       data/raw/             Telco-Customer-Churn.csv
       data/evidence/        proof files behind every claim
@@ -287,18 +289,21 @@ The SQL Server and Power BI steps stay on Windows: Windows Authentication does n
 
 ## Run and test
 
-Commands below are the intended interface; they are not implemented yet.
+Run from `backend/pipeline/` with `.venv` activated.
 
 ```
-python -m src.pipeline            # full run: bronze -> dq -> silver -> gold -> reconcile -> model -> sql server
-python -m src.integration.supabase_worker   # poll Supabase for queued uploads (Phase 7)
-python -m src.pipeline --stage bronze   # single stage
-pytest -q -m "not integration"      # quick tests (quick run, about 3 min; `pytest -q -m integration` runs the real-data and SQL Server tests, about 5 min)
-pytest -q                         # full run
-python -m src.evidence.collect    # regenerate docs/EVIDENCE.md (Phase 10)
+python -m src.pipeline                      # full run: bronze -> dq -> silver -> gold -> reconcile -> warehouse -> train -> score -> sqlserver
+python -m src.pipeline --no-sqlserver       # same, without the SQL Server copy
+python -m src.pipeline --stage bronze       # one stage (bronze, dq, silver, gold, reconcile, warehouse, train, score, sqlserver)
+python -m src.integration.supabase_worker   # poll Supabase for queued uploads
+pytest -q -m "not integration"              # quick tests (what CI runs)
+pytest -q                                   # full run: real data, Delta writes, model training, SQL Server, live Supabase
+pip install -r requirements-dev.txt         # adds pytest-cov; then add --cov=src for coverage
 ```
 
-Each run records its wall-clock time per stage in a run log. Runtime is measured, not targeted.
+Every pipeline run, including a failed one, appends one line per run to `data/evidence/pipeline_runs.jsonl` (local history, git-ignored) and rewrites `data/evidence/pipeline_run.json` with per-stage status, seconds and results. A failing stage stops the run and is recorded with its error. Runtime is measured, not targeted.
+
+Measured on the laptop (2026-11-14): full run with SQL Server 189.2 s, all 9 stages ok, SQL Server checks 21/21 pass. Quick tests: 134 passed in about 1 min 45 s (about 28 s of that is Spark start-up and the first job); coverage of `src/` in the quick tier 50% (CI fails below 45%). Tests that write Delta tables, train a model, need the real CSV, SQL Server or live Supabase are marked `integration`; the last full run of the pipeline test files passed 130/130.
 
 ## Databricks Free Edition
 

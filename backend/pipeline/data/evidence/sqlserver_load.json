@@ -1,59 +1,59 @@
 {
-  "run_id": "df1462f8c82f40268c04ec149f0e80f0",
-  "timestamp": "2026-11-12T18:55:35.876367+05:30",
+  "run_id": "1232fe874fd44cd4bf2651c958b03914",
+  "timestamp": "2026-11-14T16:39:12.969415+05:30",
   "database": "churn_db",
   "snapshot_month": "2026-10",
   "tables": {
     "dim_customer": {
       "rows": 7043,
-      "seconds": 10.9
+      "seconds": 2.5
     },
     "dim_service_profile": {
       "rows": 2386,
-      "seconds": 6.9
+      "seconds": 1.0
     },
     "dim_date": {
       "rows": 4018,
-      "seconds": 6.6
+      "seconds": 1.4
     },
     "fact_customer_snapshot": {
       "rows": 7043,
-      "seconds": 6.8
+      "seconds": 1.5
     },
     "gold_churn_overall": {
       "rows": 1,
-      "seconds": 5.1
+      "seconds": 0.5
     },
     "gold_churn_by_internet_service": {
       "rows": 3,
-      "seconds": 5.0
+      "seconds": 0.5
     },
     "gold_churn_by_contract": {
       "rows": 3,
-      "seconds": 3.7
+      "seconds": 0.7
     },
     "gold_churn_by_payment_method": {
       "rows": 4,
-      "seconds": 3.9
+      "seconds": 0.6
     },
     "gold_churn_by_tenure_band": {
       "rows": 4,
-      "seconds": 4.2
+      "seconds": 0.6
     },
     "customer_scores": {
       "rows": 7043,
-      "seconds": 5.3
+      "seconds": 1.3
     },
     "dq_results": {
       "rows": 20,
-      "seconds": 1.5
+      "seconds": 1.0
     },
     "reconciliation_results": {
       "rows": 26,
-      "seconds": 1.4
+      "seconds": 0.9
     }
   },
-  "total_seconds": 166.4,
+  "total_seconds": 39.2,
   "checks": {
     "pass": 21,
     "fail": 0
