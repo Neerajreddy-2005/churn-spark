@@ -60,7 +60,7 @@ Evidence types:
 - Fault-injection results.
 - Scale benchmark results.
 - End-to-end app test results (Playwright against the deployed site).
-- Databricks Job run history (exported, plus screenshots).
+- Databricks Job run history and job definition (exported JSON, account details removed).
 - Lighthouse report for the deployed app.
 - Security audit report with findings and fixes.
 
@@ -203,14 +203,14 @@ Acceptance criteria:
 
 Goal: the same `src/` modules run in Databricks as a scheduled Job.
 
-Files: `notebooks/`, job definition (exported JSON/YAML), screenshots.
+Files: `jobs/run_pipeline.py` (entry script), `databricks.yml` (job definition), exported run history JSON.
 
 Acceptance criteria:
 - Check the current Free Edition limits first (compute, storage, external access, scheduling).
 - Notebooks run the same `src/` modules; storage paths come from config.
 - Delta tables are written to Unity Catalog.
 - A scheduled Job runs the pipeline; the job definition is exported into the repo.
-- The repo contains the notebooks, the job definition and screenshots of a real run.
+- The repo contains the entry script, the job definition and the exported run history of real runs (including a scheduled one). Screenshots are not committed: they show account details, and the exported JSON proves the same runs.
 - A README section explains what ran where.
 - Scale benchmark on Databricks: the same synthetic datasets as Phase 10, with per-stage seconds and rows/second recorded (`<measured>`).
 
