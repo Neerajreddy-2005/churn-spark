@@ -1,7 +1,3 @@
-
-
-https://github.com/user-attachments/assets/bd569bde-41ea-4a32-b732-5f849071cdcc
-
 # Churn-Spark
 
 [![CI](https://github.com/Neerajreddy-2005/churn-spark/actions/workflows/ci.yml/badge.svg)](https://github.com/Neerajreddy-2005/churn-spark/actions/workflows/ci.yml)
@@ -14,7 +10,7 @@ Design details are in [docs/SPEC.md](docs/SPEC.md). Column and table definitions
 
 ## Demo
 
-[Open the full demo player](docs/churn-spark-demo.mp4)
+https://github.com/user-attachments/assets/bd569bde-41ea-4a32-b732-5f849071cdcc
 
 The player has controls for play, pause, seeking, volume and fullscreen. You can also [download the MP4](docs/churn-spark-demo.mp4).
 
