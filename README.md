@@ -4,9 +4,15 @@
 
 A retention workbench prototype built on the IBM Telco Customer Churn dataset. A telecom customer-retention team uploads a monthly customer CSV. A PySpark medallion pipeline (Bronze, Silver, Gold in Delta Lake) validates and processes it, and a churn model scores each customer with reasons. A public React + TypeScript app shows the data quality report, an at-risk list, retention action logging, monthly trends and pipeline run history. A SQL Server star schema and Power BI report cover analytics, and a reconciliation step proves the numbers match the source file exactly. Customer churn files in other layouts (bank, SaaS, e-commerce) are accepted too: the system explores the file, checks it, and trains a model on that file's own columns. This is a portfolio prototype, not a product.
 
-Status: pipeline, warehouse, Power BI, churn model, Supabase back end, the live website, "bring your own churn dataset", the scheduled Databricks Job, CI and the scale benchmark are done and tested (see [`docs/EVIDENCE.md`](docs/EVIDENCE.md)). Still open: a Playwright end-to-end test against the live site and a demo video.
+Status: pipeline, warehouse, Power BI, churn model, Supabase back end, the live website, "bring your own churn dataset", the scheduled Databricks Job, CI, the scale benchmark and the demo video are done and tested (see [`docs/EVIDENCE.md`](docs/EVIDENCE.md)). Still open: a Playwright end-to-end test against the live site.
 
 Design details are in [docs/SPEC.md](docs/SPEC.md). Column and table definitions are in [docs/DATA_SCHEMA.md](docs/DATA_SCHEMA.md). The website's design system is in [docs/design/DESIGN.md](docs/design/DESIGN.md).
+
+## Demo
+
+<video src="docs/churn-spark-demo.mp4" controls width="960"></video>
+
+[Download the demo video](docs/churn-spark-demo.mp4) if the embedded player is unavailable.
 
 ## Who it is for and why
 

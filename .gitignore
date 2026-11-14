@@ -43,3 +43,6 @@ backend/supabase/.temp/
 .coverage
 .coverage.*
 htmlcov/
+
+# /brag video build (frames, stems, scripts); the final video is copied to docs/
+brag-output*/
