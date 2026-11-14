@@ -10,9 +10,9 @@ Design details are in [docs/SPEC.md](docs/SPEC.md). Column and table definitions
 
 ## Demo
 
-<video src="docs/churn-spark-demo.mp4" controls width="960"></video>
+[![Churn-Spark demo preview](docs/churn-spark-demo-preview.gif)](docs/churn-spark-demo.mp4)
 
-[Download the demo video](docs/churn-spark-demo.mp4) if the embedded player is unavailable.
+Click the preview to download or open the full [demo video](docs/churn-spark-demo.mp4).
 
 ## Who it is for and why
 
