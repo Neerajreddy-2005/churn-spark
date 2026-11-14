@@ -309,7 +309,7 @@ pip install -r requirements-dev.txt         # adds pytest-cov; then add --cov=sr
 
 Every pipeline run, including a failed one, appends one line per run to `data/evidence/pipeline_runs.jsonl` (local history, git-ignored) and rewrites `data/evidence/pipeline_run.json` with per-stage status, seconds and results. A failing stage stops the run and is recorded with its error. Runtime is measured, not targeted.
 
-Measured on the laptop (2026-11-14): full run with SQL Server 189.2 s, all 9 stages ok, SQL Server checks 21/21 pass. Quick tests: 134 passed in 18.5 s on GitHub Actions (ubuntu-latest, first CI run) and about 1 min 45 s on this Windows laptop (about 28 s of that is Spark start-up and the first job); coverage of `src/` in the quick tier 50.1% (CI fails below 45%). Tests that write Delta tables, train a model, need the real CSV, SQL Server or live Supabase are marked `integration`; the last full run of the pipeline test files passed 130/130.
+Measured on the laptop (2026-11-14): full run with SQL Server 189.2 s, all 9 stages ok, SQL Server checks 21/21 pass. Quick tests: 135 passed in 18-27 s on GitHub Actions (ubuntu-latest) and about 1 min 45 s on this Windows laptop (about 28 s of that is Spark start-up and the first job); coverage of `src/` in the quick tier 47.6% on the latest CI run (50.1% before the benchmark and evidence scripts were added; CI fails below 45%). Tests that write Delta tables, train a model, need the real CSV, SQL Server or live Supabase are marked `integration`; the last full run of the pipeline test files passed 130/130.
 
 ## Runbook: what a run produces and how to read it
 
