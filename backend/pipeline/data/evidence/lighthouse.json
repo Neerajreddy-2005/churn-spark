@@ -1,40 +1,40 @@
 {
   "mobile": {
     "categories": {
-      "performance": 98,
+      "performance": 95,
       "accessibility": 100,
       "best-practices": 92,
-      "seo": 82,
+      "seo": 100,
       "agentic-browsing": 50
     },
     "metrics": {
-      "first-contentful-paint": "1.1\u00a0s",
-      "largest-contentful-paint": "2.3\u00a0s",
-      "total-blocking-time": "30\u00a0ms",
+      "first-contentful-paint": "1.2 s",
+      "largest-contentful-paint": "2.2 s",
+      "total-blocking-time": "180 ms",
       "cumulative-layout-shift": "0",
-      "speed-index": "3.0\u00a0s"
+      "speed-index": "2.6 s"
     },
-    "fetchTime": "2026-11-14T12:04:04.117Z",
+    "fetchTime": "2026-11-14T12:08:55.867Z",
     "lighthouseVersion": "13.6.0",
     "url": "https://churn-spark.netlify.app/login",
     "runtime_error": null
   },
   "desktop": {
     "categories": {
-      "performance": 99,
+      "performance": 100,
       "accessibility": 100,
       "best-practices": 92,
-      "seo": 82,
+      "seo": 100,
       "agentic-browsing": 50
     },
     "metrics": {
-      "first-contentful-paint": "0.5\u00a0s",
-      "largest-contentful-paint": "0.6\u00a0s",
-      "total-blocking-time": "0\u00a0ms",
+      "first-contentful-paint": "0.4 s",
+      "largest-contentful-paint": "0.6 s",
+      "total-blocking-time": "0 ms",
       "cumulative-layout-shift": "0",
-      "speed-index": "1.3\u00a0s"
+      "speed-index": "0.9 s"
     },
-    "fetchTime": "2026-11-14T12:04:30.685Z",
+    "fetchTime": "2026-11-14T12:09:18.223Z",
     "lighthouseVersion": "13.6.0",
     "url": "https://churn-spark.netlify.app/login",
     "runtime_error": null
