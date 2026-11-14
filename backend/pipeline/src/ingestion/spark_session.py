@@ -44,6 +44,8 @@ def get_spark(app_name="churn-spark", master="local[*]"):
         .config("spark.ui.showConsoleProgress", "false")
         .config("spark.ui.enabled", "false")
     )
+    if os.environ.get("CHURN_SPARK_DRIVER_MEMORY"):  # e.g. "6g" for the scale benchmark (default 1g)
+        builder = builder.config("spark.driver.memory", os.environ["CHURN_SPARK_DRIVER_MEMORY"])
     local_jars = sorted(JARS_DIR.glob("*.jar")) if JARS_DIR.is_dir() else []
     if all(any(j.name.startswith(r) for j in local_jars) for r in REQUIRED_JARS):
         # Local jars: no Maven/Ivy network lookup at startup (it sometimes hung for ~10 minutes).

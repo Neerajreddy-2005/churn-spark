@@ -1,0 +1,51 @@
+{
+  "timestamp": "2026-11-14T17:09:36.309041+05:30",
+  "scope": "Phase 10 focused security review (security-audit skill, guidance mode): live headers, built bundle, Supabase RLS migrations, git history",
+  "live_site_headers": {
+    "url": "https://churn-spark.netlify.app/",
+    "status": 200,
+    "content_security_policy": "default-src 'self'; script-src 'self'; ... frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'",
+    "strict_transport_security": "max-age=31536000; includeSubDomains; preload",
+    "x_content_type_options": "nosniff",
+    "x_frame_options": "DENY",
+    "referrer_policy": "strict-origin-when-cross-origin",
+    "permissions_policy": "camera=(), microphone=(), geolocation=(), payment=()"
+  },
+  "source_maps": {
+    "vite_sourcemap": false,
+    "map_files_in_local_build": 0,
+    "sourceMappingURL_refs": 0,
+    "live_probe": "/assets/index-C2Zo6K75.js.map -> 200 text/html (SPA fallback to index.html, not a map)",
+    "live_asset_matches_local_build": true
+  },
+  "bundle_secrets": {
+    "service_role_or_secret_keys": 0,
+    "jwts": 0,
+    "private_keys": 0,
+    "databricks_tokens": 0,
+    "public_keys_present": [
+      "Supabase publishable key (intended to be public)"
+    ]
+  },
+  "supabase_rls_static": {
+    "migrations": 12,
+    "tables": 12,
+    "tables_without_rls": 0,
+    "policies_using_true": 0,
+    "with_check_true": 0,
+    "grants_to_anon": 0,
+    "security_definer_functions": 18,
+    "definer_without_search_path": 0,
+    "live_behaviour": "RLS 63/63, admin 130/130 (data/evidence, commit 48b3fe2)"
+  },
+  "git_history": {
+    "commits_scanned": 10,
+    "env_files_ever_committed": 0,
+    "pattern_hits": 2,
+    "false_positives": [
+      "test fixture with fake tokens for redaction test",
+      "UI label 'reset password'"
+    ]
+  },
+  "confirmed_findings": 0
+}

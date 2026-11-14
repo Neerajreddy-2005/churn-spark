@@ -1,0 +1,303 @@
+{
+  "label": "synthetic, resampled from 7,043 real rows (src/evidence/scale_data.py)",
+  "runs": [
+    {
+      "runtime": "databricks-serverless",
+      "label": "synthetic, resampled from 7,043 real rows (src/evidence/scale_data.py)",
+      "timestamp": "2026-11-14T11:42:07.413186+00:00",
+      "machine": {
+        "runtime": "databricks-serverless client.4.10 -> workspace.churn_spark_scale"
+      },
+      "rows": 1000000,
+      "status": "ok",
+      "total_seconds": 273.7,
+      "rows_per_second": 3654,
+      "spark_version": "4.2.0",
+      "run_id": "9dd88c95c5ec463c941a4232742e755a",
+      "stages": [
+        {
+          "stage": "bronze",
+          "status": "ok",
+          "seconds": 25.8,
+          "rows_per_second": 38760
+        },
+        {
+          "stage": "dq",
+          "status": "ok",
+          "seconds": 20.0,
+          "rows_per_second": 50000
+        },
+        {
+          "stage": "silver",
+          "status": "ok",
+          "seconds": 6.7,
+          "rows_per_second": 149254
+        },
+        {
+          "stage": "gold",
+          "status": "ok",
+          "seconds": 21.8,
+          "rows_per_second": 45872
+        },
+        {
+          "stage": "reconcile",
+          "status": "ok",
+          "seconds": 17.6,
+          "rows_per_second": 56818
+        },
+        {
+          "stage": "warehouse",
+          "status": "ok",
+          "seconds": 21.1,
+          "rows_per_second": 47393
+        },
+        {
+          "stage": "train",
+          "status": "ok",
+          "seconds": 78.4,
+          "rows_per_second": 12755
+        },
+        {
+          "stage": "score",
+          "status": "ok",
+          "seconds": 82.3,
+          "rows_per_second": 12151
+        }
+      ]
+    },
+    {
+      "runtime": "laptop",
+      "label": "synthetic, resampled from 7,043 real rows (src/evidence/scale_data.py)",
+      "timestamp": "2026-11-14T17:05:02.630693+05:30",
+      "machine": {
+        "os": "Windows-10-10.0.26200-SP0",
+        "python": "3.10.0",
+        "cpu": "12th Gen Intel(R) Core(TM) i5-1235U",
+        "cores": 10,
+        "threads": 12,
+        "ram_gb": 15.7
+      },
+      "driver_memory": "4g",
+      "generate": {
+        "rows": 10000,
+        "source_rows": 7043,
+        "seed": 20261114,
+        "noise": "money x U(1-0.02, 1+0.02)",
+        "bytes": 1404590,
+        "seconds": 0.1
+      },
+      "rows": 10000,
+      "status": "ok",
+      "total_seconds": 143.9,
+      "rows_per_second": 69,
+      "spark_version": "3.5.9",
+      "run_id": "3441dead52034635bf53f3fea282df94",
+      "stages": [
+        {
+          "stage": "bronze",
+          "status": "ok",
+          "seconds": 16.9,
+          "rows_per_second": 592
+        },
+        {
+          "stage": "dq",
+          "status": "ok",
+          "seconds": 27.7,
+          "rows_per_second": 361
+        },
+        {
+          "stage": "silver",
+          "status": "ok",
+          "seconds": 5.0,
+          "rows_per_second": 2000
+        },
+        {
+          "stage": "gold",
+          "status": "ok",
+          "seconds": 15.1,
+          "rows_per_second": 662
+        },
+        {
+          "stage": "reconcile",
+          "status": "ok",
+          "seconds": 25.1,
+          "rows_per_second": 398
+        },
+        {
+          "stage": "warehouse",
+          "status": "ok",
+          "seconds": 16.7,
+          "rows_per_second": 599
+        },
+        {
+          "stage": "train",
+          "status": "ok",
+          "seconds": 19.1,
+          "rows_per_second": 524
+        },
+        {
+          "stage": "score",
+          "status": "ok",
+          "seconds": 18.3,
+          "rows_per_second": 546
+        }
+      ]
+    },
+    {
+      "runtime": "laptop",
+      "label": "synthetic, resampled from 7,043 real rows (src/evidence/scale_data.py)",
+      "timestamp": "2026-11-14T17:10:48.803168+05:30",
+      "machine": {
+        "os": "Windows-10-10.0.26200-SP0",
+        "python": "3.10.0",
+        "cpu": "12th Gen Intel(R) Core(TM) i5-1235U",
+        "cores": 10,
+        "threads": 12,
+        "ram_gb": 15.7
+      },
+      "driver_memory": "6g",
+      "generate": {
+        "rows": 1000000,
+        "source_rows": 7043,
+        "seed": 20261114,
+        "noise": "money x U(1-0.02, 1+0.02)",
+        "bytes": 139931452,
+        "seconds": 12.9
+      },
+      "rows": 1000000,
+      "status": "ok",
+      "total_seconds": 310.4,
+      "rows_per_second": 3222,
+      "spark_version": "3.5.9",
+      "run_id": "0b613c50d16e4621ad21fbd3fa52a904",
+      "stages": [
+        {
+          "stage": "bronze",
+          "status": "ok",
+          "seconds": 27.1,
+          "rows_per_second": 36900
+        },
+        {
+          "stage": "dq",
+          "status": "ok",
+          "seconds": 38.4,
+          "rows_per_second": 26042
+        },
+        {
+          "stage": "silver",
+          "status": "ok",
+          "seconds": 10.8,
+          "rows_per_second": 92593
+        },
+        {
+          "stage": "gold",
+          "status": "ok",
+          "seconds": 14.7,
+          "rows_per_second": 68027
+        },
+        {
+          "stage": "reconcile",
+          "status": "ok",
+          "seconds": 41.8,
+          "rows_per_second": 23923
+        },
+        {
+          "stage": "warehouse",
+          "status": "ok",
+          "seconds": 35.3,
+          "rows_per_second": 28329
+        },
+        {
+          "stage": "train",
+          "status": "ok",
+          "seconds": 60.6,
+          "rows_per_second": 16502
+        },
+        {
+          "stage": "score",
+          "status": "ok",
+          "seconds": 81.6,
+          "rows_per_second": 12255
+        }
+      ]
+    },
+    {
+      "runtime": "laptop",
+      "label": "synthetic, resampled from 7,043 real rows (src/evidence/scale_data.py)",
+      "timestamp": "2026-11-14T17:32:32.330290+05:30",
+      "machine": {
+        "os": "Windows-10-10.0.26200-SP0",
+        "python": "3.10.0",
+        "cpu": "12th Gen Intel(R) Core(TM) i5-1235U",
+        "cores": 10,
+        "threads": 12,
+        "ram_gb": 15.7
+      },
+      "driver_memory": "6g",
+      "generate": {
+        "rows": 10000000,
+        "source_rows": 7043,
+        "seed": 20261114,
+        "noise": "money x U(1-0.02, 1+0.02)",
+        "bytes": 1399575323,
+        "seconds": 140.3
+      },
+      "rows": 10000000,
+      "status": "ok",
+      "total_seconds": 1136.4,
+      "rows_per_second": 8800,
+      "spark_version": "3.5.9",
+      "run_id": "e40df1cd67d849249116eb82dfeac191",
+      "stages": [
+        {
+          "stage": "bronze",
+          "status": "ok",
+          "seconds": 83.6,
+          "rows_per_second": 119617
+        },
+        {
+          "stage": "dq",
+          "status": "ok",
+          "seconds": 81.7,
+          "rows_per_second": 122399
+        },
+        {
+          "stage": "silver",
+          "status": "ok",
+          "seconds": 63.3,
+          "rows_per_second": 157978
+        },
+        {
+          "stage": "gold",
+          "status": "ok",
+          "seconds": 15.6,
+          "rows_per_second": 641026
+        },
+        {
+          "stage": "reconcile",
+          "status": "ok",
+          "seconds": 154.2,
+          "rows_per_second": 64851
+        },
+        {
+          "stage": "warehouse",
+          "status": "ok",
+          "seconds": 102.2,
+          "rows_per_second": 97847
+        },
+        {
+          "stage": "train",
+          "status": "ok",
+          "seconds": 264.4,
+          "rows_per_second": 37821
+        },
+        {
+          "stage": "score",
+          "status": "ok",
+          "seconds": 371.5,
+          "rows_per_second": 26918
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,49 @@
 [
   {
+    "run_id": 597832056756426,
+    "run_name": "churn-spark-pipeline",
+    "start_time": 1794656227762,
+    "end_time": 1794656530461,
+    "run_duration": 302699,
+    "trigger": "ONE_TIME",
+    "state": {
+      "life_cycle_state": "TERMINATED",
+      "result_state": "SUCCESS",
+      "state_message": "",
+      "user_cancelled_or_timedout": false
+    },
+    "status": {
+      "state": "TERMINATED",
+      "termination_details": {
+        "code": "SUCCESS",
+        "message": "",
+        "type": "SUCCESS"
+      }
+    }
+  },
+  {
+    "run_id": 30051986585698,
+    "run_name": "churn-spark-pipeline",
+    "start_time": 1794654584045,
+    "end_time": 1794654785151,
+    "run_duration": 201106,
+    "trigger": "ONE_TIME",
+    "state": {
+      "life_cycle_state": "TERMINATED",
+      "result_state": "SUCCESS",
+      "state_message": "",
+      "user_cancelled_or_timedout": false
+    },
+    "status": {
+      "state": "TERMINATED",
+      "termination_details": {
+        "code": "SUCCESS",
+        "message": "",
+        "type": "SUCCESS"
+      }
+    }
+  },
+  {
     "run_id": 853465319587517,
     "run_name": "churn-spark-pipeline",
     "start_time": 1794652023572,

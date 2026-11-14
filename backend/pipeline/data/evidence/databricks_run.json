@@ -1,77 +1,79 @@
 {
-  "run_id": "7fffc64743ce4d0abbaa1770e058cdab",
-  "runtime": "databricks-serverless",
-  "databricks_runtime_version": "client.4.10",
+  "run_id": "30afb99194ae4890a91ea7f4acd95b51",
+  "runtime": "databricks-serverless client.4.10 -> workspace.churn_spark",
   "spark_version": "4.2.0",
-  "uc_schema": "workspace.churn_spark",
   "snapshot_month": "2026-10",
-  "timestamp": "2026-11-14T10:29:12.118219+00:00",
-  "total_seconds": 115.0,
+  "started": "2026-11-14T11:10:08.859240+00:00",
+  "status": "ok",
   "stages": [
     {
       "stage": "bronze",
-      "seconds": 6.9,
       "result": {
         "rows": 7043
-      }
+      },
+      "status": "ok",
+      "seconds": 23.5
     },
     {
-      "stage": "data_quality",
-      "seconds": 11.1,
+      "stage": "dq",
       "result": {
         "pass": 19,
-        "warn": 1,
-        "fail": 0
-      }
+        "warn": 1
+      },
+      "status": "ok",
+      "seconds": 17.1
     },
     {
       "stage": "silver",
-      "seconds": 3.7,
       "result": {
         "rows": 7043
-      }
+      },
+      "status": "ok",
+      "seconds": 4.8
     },
     {
       "stage": "gold",
-      "seconds": 13.3,
       "result": {
         "gold_churn_overall": 1,
         "gold_churn_by_internet_service": 3,
         "gold_churn_by_contract": 3,
         "gold_churn_by_payment_method": 4,
         "gold_churn_by_tenure_band": 4
-      }
+      },
+      "status": "ok",
+      "seconds": 15.9
     },
     {
-      "stage": "reconciliation",
-      "seconds": 7.3,
+      "stage": "reconcile",
       "result": {
-        "pass": 26,
-        "fail": 0
-      }
+        "pass": 26
+      },
+      "status": "ok",
+      "seconds": 8.5
     },
     {
       "stage": "warehouse",
-      "seconds": 13.1,
       "result": {
         "dim_customer": 7043,
         "dim_service_profile": 2386,
         "dim_date": 4018,
         "fact_customer_snapshot": 7043,
         "fact_customer_snapshot_month": 7043
-      }
+      },
+      "status": "ok",
+      "seconds": 19.9
     },
     {
       "stage": "train",
-      "seconds": 33.0,
       "result": {
         "auc_roc_test": 0.8328,
         "auc_pr_test": 0.6624
-      }
+      },
+      "status": "ok",
+      "seconds": 44.0
     },
     {
       "stage": "score",
-      "seconds": 26.6,
       "result": {
         "customers_scored": 7043,
         "band_counts": {
@@ -79,7 +81,11 @@
           "medium": 1665,
           "low": 4425
         }
-      }
+      },
+      "status": "ok",
+      "seconds": 37.9
     }
-  ]
+  ],
+  "total_seconds": 171.6,
+  "finished": "2026-11-14T11:13:00.467812+00:00"
 }
