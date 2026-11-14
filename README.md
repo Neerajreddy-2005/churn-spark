@@ -10,7 +10,7 @@ Design details are in [docs/SPEC.md](docs/SPEC.md). Column and table definitions
 
 ## Demo
 
-[Open the full demo player](https://neerajreddy-2005.github.io/churn-spark/)
+[Open the full demo player](docs/churn-spark-demo.mp4)
 
 The player has controls for play, pause, seeking, volume and fullscreen. You can also [download the MP4](docs/churn-spark-demo.mp4).
 
