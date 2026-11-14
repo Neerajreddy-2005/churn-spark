@@ -1,5 +1,7 @@
 # Churn-Spark
 
+[![CI](https://github.com/Neerajreddy-2005/churn-spark/actions/workflows/ci.yml/badge.svg)](https://github.com/Neerajreddy-2005/churn-spark/actions/workflows/ci.yml)
+
 A retention workbench prototype built on the IBM Telco Customer Churn dataset. A telecom customer-retention team uploads a monthly customer CSV. A PySpark medallion pipeline (Bronze, Silver, Gold in Delta Lake) validates and processes it, and a churn model scores each customer with reasons. A public React + TypeScript app shows the data quality report, an at-risk list, retention action logging, monthly trends and pipeline run history. A SQL Server star schema and Power BI report cover analytics, and a reconciliation step proves the numbers match the source file exactly. Customer churn files in other layouts (bank, SaaS, e-commerce) are accepted too: the system explores the file, checks it, and trains a model on that file's own columns. This is a portfolio prototype, not a product.
 
 Status: pipeline, warehouse, Power BI, churn model, Supabase back end, the live website and "bring your own churn dataset" are done and tested. Next: a scheduled Databricks Job (Phase 9) and CI on GitHub Actions (Phase 10).
@@ -303,7 +305,7 @@ pip install -r requirements-dev.txt         # adds pytest-cov; then add --cov=sr
 
 Every pipeline run, including a failed one, appends one line per run to `data/evidence/pipeline_runs.jsonl` (local history, git-ignored) and rewrites `data/evidence/pipeline_run.json` with per-stage status, seconds and results. A failing stage stops the run and is recorded with its error. Runtime is measured, not targeted.
 
-Measured on the laptop (2026-11-14): full run with SQL Server 189.2 s, all 9 stages ok, SQL Server checks 21/21 pass. Quick tests: 134 passed in about 1 min 45 s (about 28 s of that is Spark start-up and the first job); coverage of `src/` in the quick tier 50% (CI fails below 45%). Tests that write Delta tables, train a model, need the real CSV, SQL Server or live Supabase are marked `integration`; the last full run of the pipeline test files passed 130/130.
+Measured on the laptop (2026-11-14): full run with SQL Server 189.2 s, all 9 stages ok, SQL Server checks 21/21 pass. Quick tests: 134 passed in 18.5 s on GitHub Actions (ubuntu-latest, first CI run) and about 1 min 45 s on this Windows laptop (about 28 s of that is Spark start-up and the first job); coverage of `src/` in the quick tier 50.1% (CI fails below 45%). Tests that write Delta tables, train a model, need the real CSV, SQL Server or live Supabase are marked `integration`; the last full run of the pipeline test files passed 130/130.
 
 ## Databricks Free Edition
 
