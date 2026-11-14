@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-11-13T19:36:48.984232+05:30",
+  "timestamp": "2026-11-14T14:00:51.588777+05:30",
   "worker_run_seconds": {
-    "real_csv_2026-10": 91.1,
-    "faulty_csv_2026-11": 14.4,
-    "reprocess_2026-10": 54.7
+    "real_csv_2026-10": 71.4,
+    "faulty_csv_2026-11": 14.9,
+    "reprocess_2026-10": 57.4
   },
   "assertions": 22,
   "passed": 22,
