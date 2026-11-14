@@ -25,5 +25,10 @@ USER app
 
 # Resolve the Delta and JDBC jars at build time, so containers start without downloading them.
 RUN python -c "from src.ingestion.spark_session import get_spark; get_spark().stop()"
+# Keep them in /app/jars so Spark loads them directly at run time; Ivy would otherwise write to its
+# cache on every start, which the read-only container filesystem (compose.yaml) does not allow.
+USER root
+RUN mkdir /app/jars && cp /home/app/.ivy2/jars/*.jar /app/jars/ && chown -R app:app /app/jars
+USER app
 
 CMD ["python", "-m", "src.integration.supabase_worker", "--poll", "60"]

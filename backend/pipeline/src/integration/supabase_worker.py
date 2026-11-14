@@ -8,6 +8,7 @@ stays `processing` until every write has succeeded; any error turns it into `fai
 import argparse
 import json
 import logging
+import re
 import sys
 import time
 import uuid
@@ -45,6 +46,7 @@ STUCK_MINUTES = 60
 REASON_LIMIT = 500
 UPLOADS_DIR = PROJECT_ROOT / "data" / "uploads"
 UPLOAD_SUFFIXES = (".csv", ".xlsx")
+SAFE_NAME = re.compile(r"[A-Za-z0-9_-][A-Za-z0-9._-]{0,199}", re.ASCII)
 RUNS_DIR = PROJECT_ROOT / "data" / "runs"
 WORKER_EVIDENCE = EVIDENCE_DIR / "worker_runs.jsonl"
 SEGMENT_TYPES = ["overall", *GOLD_SEGMENTS.values()]
@@ -59,7 +61,9 @@ class Rejected(Exception):
 def validate_upload(org_id, file_path, size_bytes):
     if not file_path.startswith(f"{org_id}/"):
         raise Rejected("file path is not inside the organisation's folder")
-    if ".." in file_path.split("/") or "\\" in file_path:
+    # One plain file name directly in the org folder (the app uses <uuid>.csv): no dot or empty
+    # segments, sub-folders, control characters or look-alike Unicode.
+    if not SAFE_NAME.fullmatch(file_path[len(org_id) + 1:]):
         raise Rejected("file path is not allowed")
     if not 0 < int(size_bytes) <= MAX_BYTES:
         raise Rejected("file is larger than 5 MB")
@@ -136,11 +140,12 @@ def _jdbc_write(df, table):
 # ---- Supabase writes ----
 
 def claim_next(conn, org_id=None):
-    """Atomically take the oldest queued upload (skip locked, so two workers never share one)."""
+    """Atomically take the upload queued longest ago (skip locked, so two workers never share one).
+    queued_at, not created_at: a re-review joins the back of the queue (migration 0012)."""
     sql = ("update public.uploads set status = 'processing', started_at = now() where id = ("
            " select id from public.uploads where status = 'queued'"
            + (" and org_id = ?::uuid" if org_id else "") +
-           " order by created_at limit 1 for update skip locked)"
+           " order by queued_at limit 1 for update skip locked)"
            " returning id::text, org_id::text, file_path, original_name, size_bytes::text,"
            " snapshot_month, uploaded_by::text")
     rows = query(conn, sql, (org_id,) if org_id else ())
@@ -162,9 +167,14 @@ def fail_stuck(conn, org_id=None):
 
 
 def set_final_status(conn, upload_id, status, reason, run_id):
-    execute(conn, "update public.uploads set status = ?, status_reason = ?, run_id = ?,"
-                  " finished_at = now() where id = ?::uuid",
-            (status, None if reason is None else format_reason(reason), run_id, upload_id))
+    """Only while the upload is still 'processing': if fail_stuck (here or in another worker) has
+    already marked it failed, a slow run must not turn that back into 'done'."""
+    rows = query(conn, "update public.uploads set status = ?, status_reason = ?, run_id = ?,"
+                       " finished_at = now() where id = ?::uuid and status = 'processing' returning id::text",
+                 (status, None if reason is None else format_reason(reason), run_id, upload_id))
+    if not rows:
+        logger.warning("Upload %s was no longer processing; its final status (%s) was not written", upload_id, status)
+    return bool(rows)
 
 
 def write_check_results(spark, results, schema, table, org_id):
@@ -329,8 +339,17 @@ def run_pipeline(spark, upload, csv_path, run, run_dir):
         replace_segment_aggregates(conn, org_id, month, agg)
 
 
-def _error_reason(e):
-    return f"Processing error: {type(e).__name__}: {e}"
+def _error_reason(e, run_id):
+    """What the uploader sees for an unexpected error. Exception text can hold worker paths and Java
+    class names, so it goes to the worker log only; the reference ties the two together."""
+    if isinstance(e, ReconciliationError):  # our own check, worded for people
+        return str(e)  # "Reconciliation failed: <check ids>"
+    return f"Processing error (reference {run_id[:8]}). Try again later; if it repeats, tell the administrator."
+
+
+def _log_error(what, upload_id, run_id, e):
+    logger.error("%s for upload %s (reference %s): %s", what, upload_id, run_id[:8],
+                 format_reason(f"{type(e).__name__}: {e}"))
 
 
 def process_upload(spark, upload):
@@ -360,10 +379,13 @@ def process_upload(spark, upload):
     except Rejected as e:
         run["status"], reason = "rejected", str(e)
     except Exception as e:
-        run["status"], reason = "failed", _error_reason(e)
-        logger.error("Upload %s failed: %s", upload["id"], format_reason(reason))
+        run["status"], reason = "failed", _error_reason(e, run_id)
+        _log_error("Processing failed", upload["id"], run_id, e)
     finally:
+        # Results are in Supabase and the summary in WORKER_EVIDENCE; the working files are not
+        # needed again, and keeping them filled the shared worker's disk (audit finding #4).
         shutil.rmtree(upload_dir, ignore_errors=True)
+        shutil.rmtree(run_dir, ignore_errors=True)
 
     run["finished_at"] = datetime.now(timezone.utc).isoformat()
     has_run = bool(run["rows"])
@@ -373,9 +395,9 @@ def process_upload(spark, upload):
                 record_run(conn, run, upload["org_id"], upload)
             set_final_status(conn, upload["id"], run["status"], reason, run_id if has_run else None)
     except Exception as e:  # leave it `processing`; the next start marks it failed after 60 minutes
-        logger.error("Could not record final status for upload %s: %s", upload["id"], redact(e))
+        _log_error("Could not record final status", upload["id"], run_id, e)
         run["status"] = "failed"
-        reason = _error_reason(e)
+        reason = _error_reason(e, run_id)
     total = round(time.perf_counter() - t0, 2)
     _append_evidence(upload, run, total)
     logger.info("Upload %s -> %s in %.1fs", upload["id"], run["status"], total)
@@ -391,9 +413,12 @@ def _append_evidence(upload, run, total):
         "recon_summary": run["recon_summary"], "total_seconds": total,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
-    WORKER_EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
-    with WORKER_EVIDENCE.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(line) + "\n")
+    try:  # a full disk must not stop the worker for every organisation; the status is already saved
+        WORKER_EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
+        with WORKER_EVIDENCE.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(line) + "\n")
+    except OSError as e:
+        logger.error("Could not append worker evidence: %s", e)
 
 
 def process_queue(spark, org_id=None, max_uploads=None):

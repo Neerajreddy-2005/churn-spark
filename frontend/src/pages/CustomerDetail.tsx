@@ -82,7 +82,10 @@ export default function CustomerDetail() {
       done: 'Saved to the activity.',
       commit: async () => {
         const { error } = await supabase.from('retention_actions').insert(row)
-        return error ? `Couldn't save the action: ${error.message}` : null
+        if (!error) return null
+        return error.code === '42501'
+          ? "Couldn't save the action: your organisation reached 1,000 actions in 24 hours, or this customer is not yours."
+          : `Couldn't save the action: ${error.message}`
       },
       onCommitted: d.reload,
     })

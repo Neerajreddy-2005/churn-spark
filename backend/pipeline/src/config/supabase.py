@@ -50,6 +50,11 @@ def service_key():
 
 def jdbc_url():
     host, port = _env("SUPABASE_DB_HOST"), os.environ.get("SUPABASE_DB_PORT", "5432")
+    # sslmode=require encrypts but does not check who answers. With the project's CA certificate
+    # (Supabase dashboard > Database settings > SSL, downloaded to a file) verify the server too.
+    ca = os.environ.get("SUPABASE_DB_CA_CERT")
+    if ca:
+        return f"jdbc:postgresql://{host}:{port}/postgres?sslmode=verify-full&sslrootcert={ca}"
     return f"jdbc:postgresql://{host}:{port}/postgres?sslmode=require"
 
 

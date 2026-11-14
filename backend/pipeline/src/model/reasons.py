@@ -2,6 +2,12 @@ from pyspark.sql import functions as F
 from pyspark.sql.types import ArrayType, StringType
 
 REASON_COUNT = 3
+NAME_MAX = 40  # a column name repeats in every scored row; long ones made scores ~21x the upload (audit #7)
+
+
+def _short(text):
+    text = str(text)
+    return text if len(text) <= NAME_MAX else text[:NAME_MAX - 1] + "…"
 
 
 def _number(value):
@@ -21,15 +27,16 @@ def top_reasons(values, meta, k=REASON_COUNT):
         if contribution <= 0:
             continue
         slot = meta["slots"][i]
+        feature = _short(slot["feature"])
         if slot["kind"] == "category":
             if x <= 0:
                 continue
-            text = f"{slot['feature']} = {slot['label']}"
+            text = f"{feature} = {_short(slot['label'])}"
         elif slot["kind"] == "boolean":
-            text = f"{slot['feature']} = {'Yes' if x * meta['std'][i] > 0.5 else 'No'}"
+            text = f"{feature} = {'Yes' if x * meta['std'][i] > 0.5 else 'No'}"
         else:
             level = "high" if x > meta["means"][i] else "low"
-            text = f"{slot['feature']} = {_number(x * meta['std'][i])} ({level})"
+            text = f"{feature} = {_number(x * meta['std'][i])} ({level})"
         candidates.append((contribution, text))
     candidates.sort(key=lambda c: -c[0])
     texts = [text for _, text in candidates[:k]]

@@ -12,7 +12,7 @@ from pyspark.sql import functions as F
 from src.config.settings import REQUIRED_RAW_COLUMNS
 from src.generic.checks import can_train, run_checks
 from src.generic.profile import profile_table
-from src.generic.reader import UnreadableFile, read_table, write_canonical
+from src.generic.reader import UnreadableFile, read_table, read_table_isolated, write_canonical
 from src.generic.suggest import redact, suggest
 from src.generic.train import TrainingError, train_dataset
 from src.integration.supabase_migrate import execute, query
@@ -40,7 +40,9 @@ def load_dataset(conn, upload_id):
 
 def _read(path):
     try:
-        return read_table(path)
+        # Excel goes through openpyxl, where the worst cases are hardest to bound: parse it in a
+        # child process with memory and time limits. CSV memory is bounded by the 5 MB upload cap.
+        return read_table_isolated(path) if path.suffix.lower() == ".xlsx" else read_table(path)
     except UnreadableFile as e:
         raise Rejected(str(e)) from None
 

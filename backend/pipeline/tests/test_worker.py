@@ -39,10 +39,38 @@ def test_validate_upload_accepts_good_path():
     (f"{ORG}/..\\abc.csv", 1000),
     (f"{ORG}/abc.csv", 5 * 1024 * 1024 + 1),
     (f"{ORG}/abc.csv", 0),
+    (f"{ORG}/./abc.csv", 1000),           # dot segment
+    (f"{ORG}//abc.csv", 1000),            # empty segment
+    (f"{ORG}/sub/abc.csv", 1000),         # nested folder (the app never makes one)
+    (f"{ORG}/.abc.csv", 1000),            # hidden name
+    (f"{ORG}/abc\x00.csv", 1000),         # NUL
+    (f"{ORG}/аbc.csv", 1000),             # Cyrillic look-alike letter
 ])
 def test_validate_upload_rejects(path, size):
     with pytest.raises(Rejected):
         validate_upload(ORG, path, size)
+
+
+def test_set_final_status_only_while_processing(monkeypatch):
+    """A row that fail_stuck already marked 'failed' must not be flipped to 'done' by a slow run."""
+    from src.integration import supabase_worker as w
+    seen = {}
+
+    def fake_query(conn, sql, params):
+        seen["sql"] = sql
+        return []  # no row matched: the upload is no longer 'processing'
+    monkeypatch.setattr(w, "query", fake_query)
+    assert w.set_final_status(None, ORG, "done", None, "run1") is False
+    assert "status = 'processing'" in seen["sql"] and "returning" in seen["sql"]
+
+
+def test_error_reason_hides_internals():
+    from src.integration.supabase_worker import _error_reason
+    from src.reconciliation.checks import ReconciliationError
+    run_id = "0123456789abcdef"
+    shown = _error_reason(RuntimeError("Py4JJavaError at /opt/app/src/x.py org.apache.spark.SparkException"), run_id)
+    assert "Py4J" not in shown and "/opt" not in shown and "spark" not in shown.lower() and "01234567" in shown
+    assert _error_reason(ReconciliationError("Reconciliation failed: r01"), run_id) == "Reconciliation failed: r01"
 
 
 def test_format_reason_truncates_and_redacts(monkeypatch):
@@ -51,6 +79,51 @@ def test_format_reason_truncates_and_redacts(monkeypatch):
     assert len(out) == 500 and out.endswith("...")
     assert "abc123XYZ" not in out and "\n" not in out
     assert format_reason("short") == "short"
+
+
+@pytest.mark.parametrize("outcome", ["done", "failed"])
+def test_process_upload_removes_its_run_dir(tmp_path, monkeypatch, outcome):
+    """Audit finding #4: every run's working files used to stay in data/runs forever."""
+    from contextlib import nullcontext
+
+    from src.integration import dataset_worker
+    from src.integration import supabase_worker as w
+
+    model = tmp_path / "model"
+    model.mkdir()
+    (model / META_FILE).write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(w, "MODEL_DIR", model)
+    monkeypatch.setattr(w, "RUNS_DIR", tmp_path / "runs")
+    monkeypatch.setattr(w, "UPLOADS_DIR", tmp_path / "uploads")
+    monkeypatch.setattr(w, "WORKER_EVIDENCE", tmp_path / "worker_runs.jsonl")
+    monkeypatch.setattr(w, "validate_upload", lambda *a: None)
+    monkeypatch.setattr(w, "_db", lambda spark: nullcontext(None))
+    monkeypatch.setattr(w, "set_final_status", lambda *a: None)
+    monkeypatch.setattr(w, "record_run", lambda *a: None)
+
+    def fake_download(upload, dest_dir):
+        dest_dir.mkdir(parents=True)
+        (dest_dir / "f.csv").write_text("a,b\n1,2\n", encoding="utf-8")
+        return dest_dir / "f.csv"
+
+    def fake_profile(spark, upload, path, run, run_dir):
+        run_dir.mkdir(parents=True)
+        (run_dir / "canonical.csv").write_text("c0,c1,row\n1,2,1\n", encoding="utf-8")
+        run["rows"] = {"rows_accepted": 1}
+        if outcome == "failed":
+            raise RuntimeError("boom")
+
+    monkeypatch.setattr(w, "download", fake_download)
+    monkeypatch.setattr(dataset_worker, "load_dataset", lambda conn, upload_id: None)
+    monkeypatch.setattr(dataset_worker, "route", lambda path: "generic")
+    monkeypatch.setattr(dataset_worker, "profile_phase", fake_profile)
+
+    upload = {"id": str(uuid.uuid4()), "org_id": ORG, "file_path": f"{ORG}/f.csv", "size_bytes": "8",
+              "snapshot_month": "2026-01", "original_name": "f.csv", "uploaded_by": None}
+    result = w.process_upload(None, upload)
+    assert result["status"] == outcome
+    assert not (tmp_path / "runs" / result["run_id"]).exists()
+    assert not (tmp_path / "uploads" / upload["id"]).exists()
 
 
 def test_segment_aggregate_rows_money(spark):

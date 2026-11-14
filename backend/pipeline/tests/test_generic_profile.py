@@ -62,6 +62,79 @@ def test_reader_rejects_zip_bomb_and_bad_files(tmp_path):
         read_table(one)
 
 
+def _sparse_wide_xlsx(path, rows, dimension="A1:XFD{last}", extra_cell=None):
+    """A tiny workbook whose sheet declares a huge width but stores ~1 cell per row (audit finding #1)."""
+    extra = f'<c r="{extra_cell}1" t="inlineStr"><is><t>x</t></is></c>' if extra_cell else ""
+    body = ['<row r="1"><c r="A1" t="inlineStr"><is><t>id</t></is></c>'
+            f'<c r="B1" t="inlineStr"><is><t>Churn</t></is></c>{extra}</row>']
+    for i in range(2, rows + 2):
+        body.append(f'<row r="{i}"><c r="A{i}"><v>{i}</v></c></row>')
+    dim = f'<dimension ref="{dimension.format(last=rows + 1)}"/>' if dimension else ""
+    sheet = ('<?xml version="1.0" encoding="UTF-8"?><worksheet xmlns="http://schemas.openxmlformats.org/'
+             f'spreadsheetml/2006/main">{dim}<sheetData>{"".join(body)}</sheetData></worksheet>')
+    ns = "http://schemas.openxmlformats.org"
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("[Content_Types].xml", f'<?xml version="1.0"?><Types xmlns="{ns}/package/2006/content-types">'
+                   '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+                   '<Default Extension="xml" ContentType="application/xml"/>'
+                   '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+                   '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+                   '</Types>')
+        z.writestr("_rels/.rels", f'<?xml version="1.0"?><Relationships xmlns="{ns}/package/2006/relationships">'
+                   f'<Relationship Id="rId1" Type="{ns}/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+                   '</Relationships>')
+        z.writestr("xl/workbook.xml", f'<?xml version="1.0"?><workbook xmlns="{ns}/spreadsheetml/2006/main" '
+                   f'xmlns:r="{ns}/officeDocument/2006/relationships"><sheets>'
+                   '<sheet name="Data" sheetId="1" r:id="rId1"/></sheets></workbook>')
+        z.writestr("xl/_rels/workbook.xml.rels", f'<?xml version="1.0"?><Relationships xmlns="{ns}/package/2006/relationships">'
+                   f'<Relationship Id="rId1" Type="{ns}/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
+                   '</Relationships>')
+        z.writestr("xl/worksheets/sheet1.xml", sheet)
+
+
+def test_reader_xlsx_wide_dimension_is_rejected_without_blowing_up_memory(tmp_path):
+    """A sheet declaring 16,384 columns used to be padded to that width per row before any cap ran."""
+    import tracemalloc
+    p = tmp_path / "wide_dim.xlsx"
+    _sparse_wide_xlsx(p, rows=3000)
+    tracemalloc.start()
+    with pytest.raises(UnreadableFile, match="columns"):
+        read_table(p)
+    peak = tracemalloc.get_traced_memory()[1]
+    tracemalloc.stop()
+    assert peak < 30 * 1024 * 1024, f"peak {peak / 1e6:.0f} MB"
+
+
+def test_reader_xlsx_header_over_the_column_limit_is_rejected(tmp_path):
+    p = tmp_path / "over.xlsx"
+    _sparse_wide_xlsx(p, rows=5, dimension=None, extra_cell="CW")  # header cell in column 101
+    with pytest.raises(UnreadableFile, match="columns"):
+        read_table(p)
+
+
+def test_reader_xlsx_without_dimension_keeps_its_real_width(tmp_path):
+    p = tmp_path / "nodim.xlsx"
+    _sparse_wide_xlsx(p, rows=4, dimension=None)
+    header, rows, _ = read_table(p)
+    assert header == ["id", "Churn"] and rows == [["2", ""], ["3", ""], ["4", ""], ["5", ""]]
+
+
+def test_isolated_reader_matches_and_bounds(tmp_path):
+    from src.generic.reader import read_table_isolated
+    p = tmp_path / "w.xlsx"
+    wb = openpyxl.Workbook()
+    wb.active.append(["CustomerID", "Churn"])
+    wb.active.append([1, "Yes"])
+    wb.save(p)
+    assert read_table_isolated(p) == read_table(p)
+    fake = tmp_path / "f.xlsx"
+    fake.write_text("not a zip", encoding="utf-8")
+    with pytest.raises(UnreadableFile, match="not a readable"):
+        read_table_isolated(fake)
+    with pytest.raises(UnreadableFile, match="took more than"):
+        read_table_isolated(p, seconds=0.001)  # a child that cannot finish in time is stopped
+
+
 def test_canonical_header_never_uses_user_names(tmp_path):
     cols = write_canonical(["a`; drop table x", "b"], [["1", "2"]], tmp_path / "c.csv")
     assert (tmp_path / "c.csv").read_text(encoding="utf-8").splitlines() == ["c0,c1,row", "1,2,1"]
@@ -153,6 +226,9 @@ def test_profile_table(spark, tmp_path):
     assert sum(b["count"] for b in by["Calls"]["histogram"]) == 36
     assert by["Joined"]["kind"] == "date" and by["Plan"]["kind"] == "text"
     assert by["Churn"]["top"] == [("No", 30), ("Yes", 10)] and by["Spend"]["integer"] is False
+    assert {k: by[k]["distinct"] for k in by} == {"CustomerID": 40, "Churn": 2, "Calls": 7, "Joined": 28,
+                                                  "Plan": 2, "Spend": 40}
+    assert by["CustomerID"]["top"][:2] == [("0", 1), ("1", 1)] and len(by["CustomerID"]["top"]) == 10
     s = suggest(p)
     assert (s["target"], s["positive"], s["id"]) == ("c1", "Yes", "c0")
 

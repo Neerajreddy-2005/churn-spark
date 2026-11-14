@@ -118,7 +118,8 @@ function Review({ ds, s, onDone, onCancel }: { ds: Dataset; s: Suggestions; onDo
   }, [target])
 
   // Suggested columns first, the ones left out (with their reasons) at the end.
-  const candidates = cols.filter((c) => c.key !== target && c.key !== id)
+  // ID and personal columns (values hidden) are never offered: the database refuses them as features.
+  const candidates = cols.filter((c) => c.key !== target && c.key !== id && !c.values_hidden)
     .sort((a, b) => Number(Boolean(s.exclude[a.key])) - Number(Boolean(s.exclude[b.key])))
   const chosen = candidates.filter((c) => features.has(c.key))
   const toggle = (k: string) => setFeatures((f) => {

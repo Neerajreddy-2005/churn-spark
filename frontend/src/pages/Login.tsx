@@ -45,7 +45,13 @@ export default function Login() {
     setBusy(true)
     setError(null)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) { setError(error.message); setBusy(false); return }
+    if (error) {
+      // One message for every credential failure, so the page never tells whether an email has an account.
+      setError(error.status === 429 ? 'Too many attempts. Wait a minute and try again.'
+        : 'Email or password is incorrect.')
+      setBusy(false)
+      return
+    }
     setBusy(false)
     leave()
   }

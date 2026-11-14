@@ -80,6 +80,7 @@ function role(v: unknown): string {
 
 interface Caller {
   id: string; isPlatformAdmin: boolean; orgId: string | null; role: string | null; aal: string; label: string
+  mustChangePassword: boolean
 }
 
 // The token was already verified by auth.getUser, so its payload can be read without re-checking.
@@ -100,7 +101,7 @@ async function loadCaller(req: Request): Promise<Caller> {
   if (error || !data.user) throw new HttpError(401, 'unauthenticated', 'Sign in required')
   const id = data.user.id
   const [p, pa] = await Promise.all([
-    db.from('profiles').select('org_id, role, is_active, display_name, email').eq('user_id', id).maybeSingle(),
+    db.from('profiles').select('org_id, role, is_active, must_change_password, display_name, email').eq('user_id', id).maybeSingle(),
     db.rpc('admin_is_platform_admin', { p_user: id }),
   ])
   if (p.error || pa.error) throw serverError()
@@ -112,7 +113,8 @@ async function loadCaller(req: Request): Promise<Caller> {
   const label = isPlatformAdmin
     ? `Platform admin (${data.user.email ?? id})`
     : (p.data?.display_name || p.data?.email || data.user.email || id)
-  return { id, isPlatformAdmin, orgId: p.data?.org_id ?? null, role: p.data?.role ?? null, aal: aalOf(m[1]), label }
+  return { id, isPlatformAdmin, orgId: p.data?.org_id ?? null, role: p.data?.role ?? null, aal: aalOf(m[1]), label,
+    mustChangePassword: p.data?.must_change_password === true }
 }
 
 // Org the action applies to: a manager's own org; a platform admin (no org of their own) must
@@ -181,6 +183,8 @@ async function handle(c: Caller, body: Record<string, unknown>) {
   const action = str(body.action)
   if (action === 'whoami') return { is_platform_admin: c.isPlatformAdmin, has_org: c.orgId !== null, role: c.role, aal: c.aal }
   if (!ACTIONS.includes(action)) throw new HttpError(400, 'bad_request', 'Unknown action')
+  // Same rule as private.current_org_id(): no management until a forced password change is done.
+  if (c.mustChangePassword) throw new HttpError(403, 'password_change_required', 'Change your password first')
   if (c.isPlatformAdmin && c.aal !== 'aal2') throw new HttpError(403, 'mfa_required', 'Two-factor code required')
   if (!c.isPlatformAdmin && c.role !== 'manager') throw new HttpError(403, 'forbidden', 'Not allowed')
 
@@ -253,7 +257,10 @@ async function handle(c: Caller, body: Record<string, unknown>) {
   if (upd.error) throw serverError()
   const { error } = await db.from('profiles').update({ must_change_password: true }).eq('user_id', target.user_id)
   if (error) throw serverError()
-  await audit(c, target.org_id, 'reset_password', target.user_id, targetLabel, null)
+  // End every existing session: whoever held the old password is signed out (migration 0012).
+  const revoked = await db.rpc('admin_revoke_sessions', { p_user: target.user_id })
+  if (revoked.error) throw serverError()
+  await audit(c, target.org_id, 'reset_password', target.user_id, targetLabel, { sessions_ended: revoked.data })
   return { user_id: target.user_id, temporary_password: password }
 }
 

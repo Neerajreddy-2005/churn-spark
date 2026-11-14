@@ -97,6 +97,17 @@ def test_top_reasons_only_positive_contributions():
     assert top_reasons([0.0, 1.0, 2.0, 5.0], meta) == [None, None, None]
 
 
+def test_top_reasons_cut_long_names():
+    """Audit #7: a 120-character column name used to be repeated in full in every scored row."""
+    long_name, long_label = "x" * 120, "y" * 120
+    meta = {"slots": [{"feature": long_name, "kind": "numeric"},
+                      {"feature": long_name, "kind": "category", "label": long_label}],
+            "coefficients": [1.0, 1.0], "means": [0.0, 0.0], "std": [1.0, 1.0]}
+    numeric, category, _ = top_reasons([2.0, 1.0], meta)
+    assert numeric == "x" * 39 + "… = 2 (high)"
+    assert category == "x" * 39 + "… = " + "y" * 39 + "…"
+
+
 def test_reasons_on_toy_pipeline(spark):
     data = prepare(toy_df(spark))
     model = build_pipeline().fit(data)

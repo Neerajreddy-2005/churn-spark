@@ -1,10 +1,12 @@
 """Automatic data exploration of a canonical file (all columns read as strings, named c0..cN).
 
-Three Spark jobs whatever the column count: one aggregate for per-column statistics, one exploded
-group-by for the top values, one exploded group-by for numeric histograms.
+Three Spark jobs whatever the column count: one exploded group-by for the exact distinct counts and
+top values, one aggregate for the other per-column statistics, one exploded group-by for numeric
+histograms. (100 countDistinct in one aggregate took minutes per small file: audit finding #6.)
 """
 from pathlib import Path
 
+from pyspark.sql import Window
 from pyspark.sql import functions as F
 
 NUMBER_SHARE = 0.95   # a column is numeric when this share of its non-blank values parse as numbers
@@ -32,14 +34,13 @@ def _blank(c):
     return F.col(c).isNull() | (F.trim(F.col(c)) == "")
 
 
-def column_stats(df, keys):
+def column_stats(df, keys, distinct):
+    """distinct: {key: exact count of different non-blank values}, from value_counts."""
     aggs = [F.count(F.lit(1)).alias("_rows")]
     for c in keys:
-        v = F.when(~_blank(c), F.trim(F.col(c)))
         n = _num(c)
         aggs += [
             F.sum(_blank(c).cast("int")).alias(f"{c}__blank"),
-            F.countDistinct(v).alias(f"{c}__distinct"),
             F.count(n).alias(f"{c}__numeric"),
             F.sum((n == F.floor(n)).cast("int")).alias(f"{c}__integer"),
             F.sum(F.trim(F.col(c)).rlike(DATE_RE).cast("int")).alias(f"{c}__date"),
@@ -58,7 +59,7 @@ def column_stats(df, keys):
             "kind": "number" if is_num else "date" if is_date else "text" if filled else "empty",
             "filled": filled, "blank": row[f"{c}__blank"],
             "missing_pct": round(100.0 * row[f"{c}__blank"] / rows, 2) if rows else 0.0,
-            "distinct": row[f"{c}__distinct"],
+            "distinct": distinct[c],
         }
         if is_num:
             q = row[f"{c}__q"] or [None] * 3
@@ -69,16 +70,22 @@ def column_stats(df, keys):
     return rows, out
 
 
-def top_values(df, keys, n=TOP_N):
-    """{key: [(value, count), ...]} for the n most frequent non-blank values of every column."""
+def value_counts(df, keys, n=TOP_N):
+    """({key: distinct}, {key: [(value, count), ...]}): the exact number of different non-blank values
+    and the n most frequent of them, for every column, from one group-by. Only the top n per column
+    reach the driver."""
     pairs = F.explode(F.array(*[F.struct(F.lit(c).alias("k"), F.trim(F.col(c)).alias("v")) for c in keys]))
     counted = (df.select(pairs.alias("p")).select("p.k", "p.v")
                .where(F.col("v").isNotNull() & (F.col("v") != ""))
                .groupBy("k", "v").count())
-    out = {c: [] for c in keys}
-    for r in counted.collect():
-        out[r["k"]].append((r["v"], r["count"]))
-    return {c: sorted(vs, key=lambda x: (-x[1], x[0]))[:n] for c, vs in out.items()}
+    rank = F.row_number().over(Window.partitionBy("k").orderBy(F.desc("count"), F.asc("v")))
+    size = F.count(F.lit(1)).over(Window.partitionBy("k"))
+    ranked = counted.select("k", "v", "count", rank.alias("rank"), size.alias("distinct"))
+    distinct, top = {c: 0 for c in keys}, {c: [] for c in keys}
+    for r in sorted(ranked.where(F.col("rank") <= n).collect(), key=lambda r: r["rank"]):
+        distinct[r["k"]] = r["distinct"]
+        top[r["k"]].append((r["v"], r["count"]))
+    return distinct, top
 
 
 def histograms(df, stats, bins=BINS):
@@ -114,8 +121,8 @@ def profile_table(spark, canonical_csv, columns):
     df = read_canonical(spark, canonical_csv).cache()
     try:
         keys = [c["key"] for c in columns]
-        rows, stats = column_stats(df, keys)
-        tops = top_values(df, keys)
+        distinct, tops = value_counts(df, keys)
+        rows, stats = column_stats(df, keys, distinct)
         hists = histograms(df, stats)
     finally:
         df.unpersist()

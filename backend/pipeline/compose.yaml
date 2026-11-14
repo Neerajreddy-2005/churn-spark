@@ -10,3 +10,11 @@ services:
     command: ["python", "-m", "src.integration.supabase_worker", "--poll", "60"]
     restart: unless-stopped
     mem_limit: 4g
+    # The worker parses untrusted uploads: read-only filesystem except /tmp and the data volume,
+    # no Linux capabilities, no privilege gain, and a cap on processes/threads.
+    read_only: true
+    tmpfs:
+      - /tmp:size=1g,exec
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 512

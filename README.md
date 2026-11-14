@@ -240,6 +240,7 @@ Phase 7a: schema, row-level security and the private upload bucket.
 | `SUPABASE_ANON_KEY` (publishable, `sb_publishable_...`) | the frontend and the RLS test (acts as a user or anonymous) |
 | `SUPABASE_SERVICE_ROLE_KEY` (secret, `sb_secret_...`) | laptop only: admin API and the worker; bypasses RLS, never in a browser |
 | `SUPABASE_DB_HOST`, `SUPABASE_DB_PORT`, `SUPABASE_DB_USER`, `SUPABASE_DB_PASSWORD` | JDBC as `postgres` (session pooler): migrations, admin CLI, test seeding |
+| `SUPABASE_DB_CA_CERT` (optional) | Path to the project's CA certificate (Supabase dashboard → Database settings → SSL). When set, JDBC uses `sslmode=verify-full` and checks the server; without it, `sslmode=require` (encrypted, not verified). |
 
 ```
 python -m src.integration.supabase_migrate        # applies supabase/migrations/*.sql in order; re-running does nothing
@@ -263,7 +264,7 @@ python -m src.integration.supabase_worker --poll 30         # check every 30 sec
 python -m src.integration.supabase_worker --once --org-id <uuid> --max 1   # optional filters
 ```
 
-Upload statuses: `queued` (waiting), `processing` (claimed by a worker), `done` (results are in Supabase; `run_id` is set), `rejected` (the file is unacceptable: wrong columns, failed data quality rules, bad path or over 5 MB; `status_reason` says why and the DQ results are still stored), `failed` (a worker or infrastructure error, or reconciliation mismatch; re-upload). An upload stuck in `processing` for over 60 minutes is marked `failed` ("worker interrupted; please re-upload") the next time the worker starts. Work files go under `data/runs/<run_id>/` (kept for audit, git-ignored); one evidence line per upload is appended to `data/evidence/worker_runs.jsonl`.
+Upload statuses: `queued` (waiting), `processing` (claimed by a worker), `done` (results are in Supabase; `run_id` is set), `rejected` (the file is unacceptable: wrong columns, failed data quality rules, bad path or over 5 MB; `status_reason` says why and the DQ results are still stored), `failed` (a worker or infrastructure error, or reconciliation mismatch; re-upload). An upload stuck in `processing` for over 60 minutes is marked `failed` ("worker interrupted; please re-upload") the next time the worker starts. Work files go under `data/runs/<run_id>/` (git-ignored) and are deleted when the upload finishes, since the results, DQ and reconciliation rows are in Supabase; one evidence line per upload is appended to `data/evidence/worker_runs.jsonl`.
 
 ## Run the worker in Docker (recommended)
 

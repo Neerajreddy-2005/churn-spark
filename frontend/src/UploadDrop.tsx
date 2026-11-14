@@ -6,7 +6,7 @@ import { IconFile, IconUpload } from './icons'
 
 const MAX_BYTES = 5 * 1024 * 1024
 const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/
-const DENIED = 'Upload limit reached (20 per day) or not allowed'
+const DENIED = 'Upload limit reached (20 uploads or re-reviews per day, or 200 datasets stored) or not allowed'
 const XLSX_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 // Mirrors backend/pipeline/config/dq_rules.json (allowed values and ranges).
