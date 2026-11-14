@@ -4,7 +4,7 @@
 
 A retention workbench prototype built on the IBM Telco Customer Churn dataset. A telecom customer-retention team uploads a monthly customer CSV. A PySpark medallion pipeline (Bronze, Silver, Gold in Delta Lake) validates and processes it, and a churn model scores each customer with reasons. A public React + TypeScript app shows the data quality report, an at-risk list, retention action logging, monthly trends and pipeline run history. A SQL Server star schema and Power BI report cover analytics, and a reconciliation step proves the numbers match the source file exactly. Customer churn files in other layouts (bank, SaaS, e-commerce) are accepted too: the system explores the file, checks it, and trains a model on that file's own columns. This is a portfolio prototype, not a product.
 
-Status: pipeline, warehouse, Power BI, churn model, Supabase back end, the live website, "bring your own churn dataset", the scheduled Databricks Job, CI, the scale benchmark and the demo video are done and tested (see [`docs/EVIDENCE.md`](docs/EVIDENCE.md)). Still open: a Playwright end-to-end test against the live site.
+Status: pipeline, warehouse, Power BI, churn model, Supabase back end, the live website, "bring your own churn dataset", the scheduled Databricks Job, CI, the scale benchmark and the demo video are done and tested (see [`docs/EVIDENCE.md`](docs/EVIDENCE.md)). A Playwright end-to-end test of the live site passes 6/6 (desktop and phone width).
 
 Design details are in [docs/SPEC.md](docs/SPEC.md). Column and table definitions are in [docs/DATA_SCHEMA.md](docs/DATA_SCHEMA.md). The website's design system is in [docs/design/DESIGN.md](docs/design/DESIGN.md).
 
@@ -310,6 +310,14 @@ pytest -q -m "not integration"              # quick tests (what CI runs)
 pytest -q                                   # full run: real data, Delta writes, model training, SQL Server, live Supabase
 pip install -r requirements-dev.txt         # adds pytest-cov; then add --cov=src for coverage
 ```
+
+End-to-end test of the live website (Playwright, uses your installed Chrome). Run from `frontend/` with a test login in the git-ignored `frontend/.env.e2e` (`E2E_EMAIL`, `E2E_PASSWORD`):
+
+```
+npm run e2e     # signed-out redirect, wrong-password error, then 5 pages at desktop and phone width; fails on any console, page or network error
+```
+
+It writes `backend/pipeline/data/evidence/e2e_live.json`. Two known and harmless browser messages are ignored on purpose: the CSP blocking the inline script Netlify injects, and requests the app cancels while navigating.
 
 Every pipeline run, including a failed one, appends one line per run to `data/evidence/pipeline_runs.jsonl` (local history, git-ignored) and rewrites `data/evidence/pipeline_run.json` with per-stage status, seconds and results. A failing stage stops the run and is recorded with its error. Runtime is measured, not targeted.
 

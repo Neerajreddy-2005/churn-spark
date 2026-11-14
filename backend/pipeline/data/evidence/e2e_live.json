@@ -1,0 +1,370 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "c:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\frontend\\node_modules\\@playwright\\test\\cli.js",
+      "test"
+    ],
+    "configFile": "c:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\frontend\\playwright.config.ts",
+    "rootDir": "c:/Users/dvenk/OneDrive/Desktop/btech/Projects/Churn-Spark/frontend/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "c:/Users/dvenk/OneDrive/Desktop/btech/Projects/Churn-Spark/frontend/e2e-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "c:/Users/dvenk/OneDrive/Desktop/btech/Projects/Churn-Spark/frontend/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "c:/Users/dvenk/OneDrive/Desktop/btech/Projects/Churn-Spark/frontend/e2e-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "c:/Users/dvenk/OneDrive/Desktop/btech/Projects/Churn-Spark/frontend/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "c:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\frontend\\e2e-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "c:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\frontend\\e2e",
+        "snapshotDir": "c:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\frontend\\e2e",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 30000,
+        "use": {
+          "baseURL": "https://churn-spark.netlify.app",
+          "channel": "chrome",
+          "screenshot": "on",
+          "trace": "retain-on-failure",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "c:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\frontend\\e2e-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "phone",
+        "testDir": "c:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\frontend\\e2e",
+        "snapshotDir": "c:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\frontend\\e2e",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 30000,
+        "use": {
+          "baseURL": "https://churn-spark.netlify.app",
+          "channel": "chrome",
+          "screenshot": "on",
+          "trace": "retain-on-failure",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "phone"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "../backend/pipeline/data/evidence/e2e_live.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "smoke.spec.ts",
+      "file": "smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "signed-out visitors are sent to the login page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2377,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-14T22:50:13.141Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "c:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\frontend\\e2e-results\\smoke-signed-out-visitors-are-sent-to-the-login-page-desktop\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2328,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-14T22:50:35.771Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "c:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\frontend\\e2e-results\\smoke-signed-out-visitors-are-sent-to-the-login-page-phone\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4219922fea2e2bd3c691-cdd97758840a5c007eba",
+          "file": "smoke.spec.ts",
+          "line": 23,
+          "column": 1
+        },
+        {
+          "title": "wrong password shows one generic error",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3356,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-14T22:50:15.975Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "c:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\frontend\\e2e-results\\smoke-wrong-password-shows-one-generic-error-desktop\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2560,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-14T22:50:38.805Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "c:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\frontend\\e2e-results\\smoke-wrong-password-shows-one-generic-error-phone\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4219922fea2e2bd3c691-55156afe4061ab8ae885",
+          "file": "smoke.spec.ts",
+          "line": 31,
+          "column": 1
+        },
+        {
+          "title": "signed-in user can open every main page with a clean console",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13893,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-14T22:50:19.366Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "c:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\frontend\\e2e-results\\smoke-signed-in-user-can-o-4b4c7-n-page-with-a-clean-console-desktop\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            },
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11510,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-14T22:50:41.382Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "c:\\Users\\dvenk\\OneDrive\\Desktop\\btech\\Projects\\Churn-Spark\\frontend\\e2e-results\\smoke-signed-in-user-can-o-4b4c7-n-page-with-a-clean-console-phone\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "4219922fea2e2bd3c691-2f277c3a6695aa83e3a2",
+          "file": "smoke.spec.ts",
+          "line": 40,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-14T22:50:12.528Z",
+    "duration": 40639.758,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

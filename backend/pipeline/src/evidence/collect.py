@@ -129,6 +129,14 @@ def app_rows():
                        "shown only to prove why those columns are removed" for r in leaky)
         out.append(row("Public Kaggle churn files in other layouts", f"{len(m2['results'])} runs, {len(honest)} honest "
                        f"models; test AUC-ROC: {aucs}{note}", "mode2_datasets.json", "python -m src.evidence.mode2_datasets"))
+    e2e = load("e2e_live.json")
+    claim, how = "Playwright end-to-end test of the live site (sign-in, 5 pages, desktop and phone width)", "cd frontend; npm run e2e"
+    if e2e:
+        s = e2e["stats"]
+        out.append(row(claim, f"{s['expected']}/{s['expected'] + s['unexpected'] + s['flaky']} tests pass, clean console "
+                       f"({day(s['startTime'])})", "e2e_live.json", how))
+    else:
+        out.append(missing(claim, "e2e_live.json", how))
     return out
 
 
