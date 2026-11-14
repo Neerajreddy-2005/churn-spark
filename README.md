@@ -12,8 +12,6 @@ Design details are in [docs/SPEC.md](docs/SPEC.md). Column and table definitions
 
 https://github.com/user-attachments/assets/bd569bde-41ea-4a32-b732-5f849071cdcc
 
-The player has controls for play, pause, seeking, volume and fullscreen. You can also [download the MP4](docs/churn-spark-demo.mp4).
-
 ## Who it is for and why
 
 **In one line:** each month a subscription company uploads its customer list, and Churn-Spark tells the retention team which customers are most likely to leave, why, and how much revenue is at stake. Every number is checked against the source file.
