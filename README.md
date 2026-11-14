@@ -4,7 +4,7 @@
 
 A retention workbench prototype built on the IBM Telco Customer Churn dataset. A telecom customer-retention team uploads a monthly customer CSV. A PySpark medallion pipeline (Bronze, Silver, Gold in Delta Lake) validates and processes it, and a churn model scores each customer with reasons. A public React + TypeScript app shows the data quality report, an at-risk list, retention action logging, monthly trends and pipeline run history. A SQL Server star schema and Power BI report cover analytics, and a reconciliation step proves the numbers match the source file exactly. Customer churn files in other layouts (bank, SaaS, e-commerce) are accepted too: the system explores the file, checks it, and trains a model on that file's own columns. This is a portfolio prototype, not a product.
 
-Status: pipeline, warehouse, Power BI, churn model, Supabase back end, the live website and "bring your own churn dataset" are done and tested. Next: a scheduled Databricks Job (Phase 9) and CI on GitHub Actions (Phase 10).
+Status: pipeline, warehouse, Power BI, churn model, Supabase back end, the live website, "bring your own churn dataset", the scheduled Databricks Job, CI and the scale benchmark are done and tested (see [`docs/EVIDENCE.md`](docs/EVIDENCE.md)). Still open: a Playwright end-to-end test against the live site and a demo video.
 
 Design details are in [docs/SPEC.md](docs/SPEC.md). Column and table definitions are in [docs/DATA_SCHEMA.md](docs/DATA_SCHEMA.md). The website's design system is in [docs/design/DESIGN.md](docs/design/DESIGN.md).
 
@@ -372,15 +372,15 @@ python jobs/export_evidence.py    # job definition + run history into data/evide
 
 In Git Bash, set `MSYS_NO_PATHCONV=1` first, or it rewrites `/Volumes/...` and `/Users/...` into Windows paths.
 
-## Resume bullet template
+## Resume bullets
 
-Fill in only values you have measured or taken from the data. Remove any bullet you cannot back up.
+Every number below is in [`docs/EVIDENCE.md`](docs/EVIDENCE.md) with its proof file and the command that reproduces it. Synthetic numbers are labelled.
 
-- Built a PySpark and Delta Lake medallion pipeline (Bronze/Silver/Gold) processing `<rows>` customer records, with `<n>` automated data quality rules and exact reconciliation (`<n>` checks, `<pass/fail result>`) against an independent pandas calculation; uploads that fail validation are rejected with the failed rules.
-- Designed a SQL Server star schema and Power BI report, and documented findings with SQL-backed numbers (for example `<value>` monthly revenue lost to churn).
-- Trained an explainable Spark MLlib logistic regression churn model (test AUC `<measured>`), with top 3 reasons per customer and no label leakage.
-- Built and deployed a retention workbench (React + TypeScript on Netlify, Supabase with row-level security) where a team uploads data, reviews at-risk customers and logs retention actions; `<n>` tables, `<n>` RLS policies tested.
-- Ran the same modules as a scheduled Databricks Job writing Unity Catalog Delta tables; `<n>` pytest tests, quick run `<measured>`, end-to-end run `<measured>` on `<hardware>`.
+- Built a PySpark and Delta Lake medallion pipeline (Bronze/Silver/Gold) on 7,043 customer records with 20 automated data-quality rules and 26 exact reconciliation checks (26/26 pass) against an independent pure-Python recount; fault injection planted 425 defects and all 450 expected failing rows were caught, and a bad file is blocked before Silver.
+- Designed a SQL Server star schema (fact 7,043 rows, 3 dimensions; 21/21 cross-checks against Delta) and a Power BI report; SQL analysis showed 139,130.85 of 456,116.60 monthly revenue (30.50%) came from customers who churned.
+- Trained an explainable Spark MLlib logistic regression churn model (held-out AUC-ROC 0.8328) with top-3 reasons per customer and no label leakage; its top 20% riskiest customers capture 49.33% of churners (lift 2.47).
+- Built and deployed a retention workbench (React + TypeScript on Netlify, Supabase with row-level security): 63/63 live RLS checks and 130/130 admin-panel checks pass; Lighthouse 100 accessibility and 100 SEO; CSP, HSTS and clickjacking headers verified on the live site.
+- Ran the same modules as a scheduled Databricks serverless Job writing Unity Catalog tables (results identical to the laptop), and benchmarked the full pipeline on synthetic data resampled from the real rows: 10M rows in 1,136 s on a laptop, 1M rows in 274 s on Databricks; 184 pytest tests, 135 run in CI in under 30 s.
 
 ## Interview notes
 
@@ -408,7 +408,10 @@ How to talk about this project, and the real problems hit while building it. Eve
 | Bring your own dataset | 4 public churn files trained on their own columns: holdout AUC 0.770 (bank), 0.902 (SaaS), 0.903 (e-commerce), 0.868 (IBM 33-column); reconciliation all pass; a non-churn file gets exploration only | `mode2_datasets.json` |
 | Leakage guard | Outcome columns put back are caught: 2 removed at single-column AUC 1.000, 1 flagged at 0.948 | `mode2_datasets.json` (`leakage columns put back`) |
 | Mode 2 live | 39 of 39 live checks pass (auto-train, change columns, other org blocked, actions only on own scored rows, Excel, broken files) | `datasets_live_test.json` |
-| Automated tests | 103 quick tests + 26 live tests | `pytest -m "not integration"` and the three live suites |
+| Automated tests | 184 pytest tests: 135 quick ones run in CI in 18-27 s (coverage 47.6%), 46 integration/live | `pytest`, GitHub Actions log |
+| Databricks | Same modules as a scheduled serverless Job; results identical to the laptop (AUC 0.8328, 26/26 reconciliation) | `databricks_run.json`, `databricks_run_history.json` |
+| Scale (synthetic, resampled from 7,043 real rows) | 1M rows: 310.4 s laptop, 273.7 s Databricks; 10M rows: 1,136.4 s laptop; reconciliation exact at every size | `scale_benchmark.json` |
+| Live site | Lighthouse performance 95-100, accessibility 100, SEO 100; security headers verified | `lighthouse.json`, `security_check.json` |
 
 ### Problems we hit and how we solved them
 
